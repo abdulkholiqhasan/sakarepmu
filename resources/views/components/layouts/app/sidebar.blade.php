@@ -30,6 +30,10 @@
                         // Media routes (guarded - fallback to '#')
                         $mediaUpload = Route::has('media.upload') ? route('media.upload') : '#';
                         $mediaIndex = Route::has('media.index') ? route('media.index') : '#';
+                        // Appearance routes (guarded - fallback to '#')
+                        $appearanceThemes = Route::has('appearance.themes') ? route('appearance.themes') : '#';
+                        $appearanceMenus = Route::has('appearance.menus') ? route('appearance.menus') : '#';
+                        $appearanceWidgets = Route::has('appearance.widgets') ? route('appearance.widgets') : '#';
                     @endphp
                     <flux:navlist.item class="sidebar-item" icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-label="Dashboard" aria-label="Dashboard">
                         <span class="sidebar-label">Dashboard</span>
@@ -124,7 +128,15 @@
             <flux:spacer />
 
             <!-- Footer menus grouped to reduce vertical spacing -->
-            <div class="space-y-1">
+                <div class="space-y-1">
+                <div class="expanded-only">
+                    <flux:sidebar.group heading="Appearance" icon="paint-brush" expandable :expanded="false" class="sidebar-item" data-label="Appearance" aria-label="Appearance">
+                        <flux:navlist.item href="{{ $appearanceThemes }}" wire:navigate>Themes</flux:navlist.item>
+                        <flux:navlist.item href="{{ $appearanceMenus }}" wire:navigate>Menus</flux:navlist.item>
+                        <flux:navlist.item href="{{ $appearanceWidgets }}" wire:navigate>Widgets</flux:navlist.item>
+                    </flux:sidebar.group>
+                </div>
+
                 <div class="expanded-only">
                     <flux:sidebar.group heading="Manages" icon="user-group" expandable :expanded="false" class="sidebar-item" data-label="Manages" aria-label="Manages">
                         <flux:navlist.item href="{{ $usersIndex }}" wire:navigate>Users</flux:navlist.item>
@@ -143,6 +155,22 @@
 
                 <!-- Compact-only footer grouped -->
                 <div class="compact-only flex flex-col space-y-1">
+                    <div class="compact-sidebar-group sidebar-item" data-label="Appearance">
+                        <flux:dropdown position="right" align="start">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open appearance" data-compact-target="Appearance">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item href="{{ $appearanceThemes }}" icon="paint-brush" wire:navigate>Themes</flux:menu.item>
+                                    <flux:menu.item href="{{ $appearanceMenus }}" icon="bars-3" wire:navigate>Menus</flux:menu.item>
+                                    <flux:menu.item href="{{ $appearanceWidgets }}" icon="puzzle-piece" wire:navigate>Widgets</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
                     <div class="compact-sidebar-group sidebar-item" data-label="Manages">
                         <flux:dropdown position="right" align="start">
                             <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open manages" data-compact-target="Manages">
