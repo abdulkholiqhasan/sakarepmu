@@ -296,6 +296,51 @@ select:focus[data-flux-control] {
         display: block;
     }
 
+    /* Compact sidebar: make icons muted by default and black on hover/active to match expanded sidebar */
+    body[data-sidebar-compact="1"] #sidebar .sidebar-item,
+    body[data-sidebar-compact="1"] #sidebar .compact-only .compact-trigger,
+    body[data-sidebar-compact="1"] #sidebar .flux-navlist-item,
+    body[data-sidebar-compact="1"] #sidebar flux\:navlist.item,
+    body[data-sidebar-compact="1"] #sidebar flux\:sidebar.group {
+        color: var(--color-zinc-600); /* muted gray color for icons */
+    }
+
+    /* Dark mode variant: slightly lighter muted color */
+    body.dark[data-sidebar-compact="1"] #sidebar .sidebar-item,
+    body.dark[data-sidebar-compact="1"] #sidebar .compact-only .compact-trigger,
+    body.dark[data-sidebar-compact="1"] #sidebar .flux-navlist-item,
+    body.dark[data-sidebar-compact="1"] #sidebar flux\:navlist.item,
+    body.dark[data-sidebar-compact="1"] #sidebar flux\:sidebar.group {
+        color: var(--color-zinc-400);
+    }
+
+    /* Make SVG strokes/fill follow currentColor so color changes apply */
+    body[data-sidebar-compact="1"] #sidebar svg {
+        color: inherit; /* ensure SVG uses parent color */
+    }
+
+    /* On hover/focus/active (or when the item has current/active state) make icon black */
+    body[data-sidebar-compact="1"] #sidebar [data-label]:hover,
+    body[data-sidebar-compact="1"] #sidebar [data-label]:focus,
+    body[data-sidebar-compact="1"] #sidebar .sidebar-item:hover,
+    body[data-sidebar-compact="1"] #sidebar .sidebar-item:focus,
+    body[data-sidebar-compact="1"]
+        #sidebar
+        .compact-only
+        .compact-trigger:hover,
+    body[data-sidebar-compact="1"]
+        #sidebar
+        .compact-only
+        .compact-trigger:focus,
+    body[data-sidebar-compact="1"]
+        #sidebar
+        .flux-navlist-item[aria-current="true"],
+    body[data-sidebar-compact="1"]
+        #sidebar
+        flux\:navlist.item[aria-current="true"] {
+        color: var(--color-zinc-900); /* black when hovered/active */
+    }
+
     /* Also normalize SVG sizes for regular sidebar items when compact
        so icons like Dashboard match the compact trigger icons. */
     body[data-sidebar-compact="1"] #sidebar .sidebar-item svg,

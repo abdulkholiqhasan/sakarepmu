@@ -220,7 +220,7 @@
                     <!-- Horizontal Navbar (Desktop): minimize di kiri, profile di kanan -->
                     <nav class="hidden lg:flex items-center justify-between px-6 h-16 border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 relative z-20">
                         <div>
-                            <button id="sidebar-minimize-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" title="Minimize Sidebar" aria-pressed="false">
+                            <button id="sidebar-minimize-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-pressed="false">
                                 <svg id="sidebar-minimize-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-200" viewBox="0 0 24 24" aria-hidden="true">
                                     <!-- Modern hamburger (default) toggles to X when compact -->
                                     <!-- We keep the same path id so existing JS continues to work -->
