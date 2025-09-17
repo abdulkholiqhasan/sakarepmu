@@ -1,0 +1,234 @@
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+
+    --color-zinc-50: #fafafa;
+    --color-zinc-100: #f5f5f5;
+    --color-zinc-200: #e5e5e5;
+    --color-zinc-300: #d4d4d4;
+    --color-zinc-400: #a3a3a3;
+    --color-zinc-500: #737373;
+    --color-zinc-600: #525252;
+    --color-zinc-700: #404040;
+    --color-zinc-800: #262626;
+    --color-zinc-900: #171717;
+    --color-zinc-950: #0a0a0a;
+
+    --color-accent: var(--color-neutral-800);
+    --color-accent-content: var(--color-neutral-800);
+    --color-accent-foreground: var(--color-white);
+}
+
+@layer theme {
+    .dark {
+        --color-accent: var(--color-white);
+        --color-accent-content: var(--color-white);
+        --color-accent-foreground: var(--color-neutral-800);
+    }
+}
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+[data-flux-field]:not(ui-radio, ui-checkbox) {
+    @apply grid gap-2;
+}
+
+[data-flux-label] {
+    @apply !mb-0 !leading-tight;
+}
+
+input:focus[data-flux-control],
+textarea:focus[data-flux-control],
+select:focus[data-flux-control] {
+    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+}
+
+/* \[:where(&)\]:size-4 {
+    @apply size-4;
+} */
+
+/* Sidebar compact / minimize styles moved from sidebar Blade view
+     File: resources/views/components/layouts/app/sidebar.blade.php
+*/
+@layer components {
+    /* Sidebar compact: hide labels, keep icons centered and tooltips */
+    #sidebar-wrapper {
+        /* participates in layout transitions */
+    }
+
+    #sidebar-wrapper.sidebar-compact,
+    body[data-sidebar-compact="1"] #sidebar-wrapper.sidebar-compact,
+    body[data-sidebar-compact="1"] #sidebar-wrapper {
+        overflow-x: visible !important; /* allow tooltips to overflow */
+    }
+
+    #sidebar-wrapper.sidebar-compact [id="sidebar"],
+    body[data-sidebar-compact="1"] #sidebar-wrapper [id="sidebar"] {
+        width: 4rem !important;
+        min-width: 4rem !important;
+        max-width: 4rem !important;
+        overflow: visible !important;
+        transition: width 200ms ease-in-out;
+    }
+
+    /* Hide text labels but keep layout spacing for icons */
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .sidebar-label,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .sidebar-group-label,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .truncate,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .text-xs,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .font-semibold,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        .sidebar-label,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        .sidebar-group-label,
+    body[data-sidebar-compact="1"] #sidebar-wrapper [id="sidebar"] .truncate,
+    body[data-sidebar-compact="1"] #sidebar-wrapper [id="sidebar"] .text-xs,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        .font-semibold {
+        display: none !important;
+    }
+
+    /* Center icons inside nav items when compact (target .sidebar-item) */
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .sidebar-item,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] .flux-navlist-item,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] flux\:navlist.item,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        .sidebar-item,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        .flux-navlist-item,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        flux\:navlist.item {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0 !important; /* remove spacing so icons are centered */
+    }
+
+    /* sr-only helper for screen readers */
+    .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+
+    /* Tooltip for compact icons using data-label attr on nav items */
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label] {
+        position: relative;
+    }
+
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        font-size: 12px;
+        opacity: 0;
+        pointer-events: none;
+        margin-left: 10px;
+        transition: opacity 120ms ease, transform 120ms ease;
+        transform-origin: left center;
+        z-index: 60;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]:hover::after,
+    #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]:focus::after {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    /* Mirror tooltip behavior when body attribute is used */
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        [data-label]::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        padding: 6px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+        font-size: 12px;
+        opacity: 0;
+        pointer-events: none;
+        margin-left: 10px;
+        transition: opacity 120ms ease, transform 120ms ease;
+        transform-origin: left center;
+        z-index: 60;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        [data-label]:hover::after,
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        [data-label]:focus::after {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    /* Make the minimize button accessible when toggled */
+    #sidebar-minimize-btn[aria-pressed="true"] {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Respect user preference for reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        #sidebar-wrapper [id="sidebar"],
+        #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]::after {
+            transition: none !important;
+        }
+    }
+}
