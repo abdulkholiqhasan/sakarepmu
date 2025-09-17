@@ -137,6 +137,22 @@ select:focus[data-flux-control] {
         gap: 0 !important; /* remove spacing so icons are centered */
     }
 
+    /* Also ensure sidebar group triggers (Settings) behave like items when compact */
+    #sidebar-wrapper.sidebar-compact
+        [id="sidebar"]
+        flux\:sidebar.group[class*="sidebar-item"],
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        flux\:sidebar.group[class*="sidebar-item"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        gap: 0 !important;
+    }
+
     /* sr-only helper for screen readers */
     .sr-only {
         position: absolute !important;
@@ -158,9 +174,9 @@ select:focus[data-flux-control] {
     #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]::after {
         content: attr(data-label);
         position: absolute;
-        left: 100%;
+        left: calc(100% + 10px);
         top: 50%;
-        transform: translateY(-50%);
+        transform: translateY(-50%) translateX(0);
         background: rgba(0, 0, 0, 0.85);
         color: #fff;
         padding: 6px 8px;
@@ -169,7 +185,6 @@ select:focus[data-flux-control] {
         font-size: 12px;
         opacity: 0;
         pointer-events: none;
-        margin-left: 10px;
         transition: opacity 120ms ease, transform 120ms ease;
         transform-origin: left center;
         z-index: 60;
@@ -189,9 +204,9 @@ select:focus[data-flux-control] {
         [data-label]::after {
         content: attr(data-label);
         position: absolute;
-        left: 100%;
+        left: calc(100% + 10px);
         top: 50%;
-        transform: translateY(-50%);
+        transform: translateY(-50%) translateX(0);
         background: rgba(0, 0, 0, 0.85);
         color: #fff;
         padding: 6px 8px;
@@ -200,7 +215,6 @@ select:focus[data-flux-control] {
         font-size: 12px;
         opacity: 0;
         pointer-events: none;
-        margin-left: 10px;
         transition: opacity 120ms ease, transform 120ms ease;
         transform-origin: left center;
         z-index: 60;
@@ -224,11 +238,109 @@ select:focus[data-flux-control] {
         background-color: rgba(0, 0, 0, 0.04);
     }
 
+    /* Compact-only helper: hidden by default, visible when compact */
+    .compact-only {
+        display: none;
+    }
+
+    body[data-sidebar-compact="1"] .compact-only {
+        display: block !important;
+    }
+
+    /* Hide the full sidebar.group display when compact so only the compact trigger shows */
+    /* Hide only the original Settings group when compact (so compact-only trigger remains) */
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        flux\:sidebar.group[data-label="Settings"],
+    body[data-sidebar-compact="1"]
+        #sidebar-wrapper
+        [id="sidebar"]
+        flux\:sidebar.group[class*="sidebar-item"][data-label="Settings"] {
+        display: none !important;
+    }
+
+    /* Simpler: hide any expanded-only wrapper when compact */
+    body[data-sidebar-compact="1"] .expanded-only {
+        display: none !important;
+    }
+
+    /* Make compact-only trigger visually match other compact items */
+    body[data-sidebar-compact="1"] .compact-only button[slot="trigger"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 0.5rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Ensure our compact-trigger (span) matches sizing/centering in compact mode */
+    body[data-sidebar-compact="1"] #sidebar .compact-only .compact-trigger {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        /* slightly larger to improve tappability and visual weight */
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        padding: 0.375rem !important;
+    }
+
+    /* Ensure SVG icons inside compact triggers scale up and remain centered */
+    body[data-sidebar-compact="1"] #sidebar .compact-only .compact-trigger svg {
+        width: 1.25rem !important; /* 20px */
+        height: 1.25rem !important; /* 20px */
+        display: block;
+    }
+
+    /* Also normalize SVG sizes for regular sidebar items when compact
+       so icons like Dashboard match the compact trigger icons. */
+    body[data-sidebar-compact="1"] #sidebar .sidebar-item svg,
+    body[data-sidebar-compact="1"] #sidebar .flux-navlist-item svg,
+    body[data-sidebar-compact="1"] #sidebar flux\:navlist.item svg,
+    body[data-sidebar-compact="1"] #sidebar flux\:sidebar.group svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        display: block;
+    }
+
+    /* Make compact-only wrapper center the trigger and ensure it's clickable */
+    body[data-sidebar-compact="1"] #sidebar .compact-only {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    body[data-sidebar-compact="1"] #sidebar .compact-only .compact-trigger {
+        cursor: pointer !important;
+        border: none !important;
+        background: transparent !important;
+        pointer-events: auto !important;
+    }
+
     /* Respect user preference for reduced motion */
     @media (prefers-reduced-motion: reduce) {
         #sidebar-wrapper [id="sidebar"],
         #sidebar-wrapper.sidebar-compact [id="sidebar"] [data-label]::after {
             transition: none !important;
         }
+    }
+
+    /* Extra fallback: ensure our Blade wrappers behave if other CSS isn't present */
+    .expanded-only {
+        display: block;
+    }
+    .compact-only {
+        display: none;
+    }
+    body[data-sidebar-compact="1"] .expanded-only {
+        display: none !important;
+    }
+    body[data-sidebar-compact="1"] .compact-only {
+        display: block !important;
     }
 }

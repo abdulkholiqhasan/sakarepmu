@@ -14,10 +14,161 @@
             </a>
 
             <flux:navlist variant="outline">
+                    @php
+                        $postsCreate = Route::has('posts.create') ? route('posts.create') : '#';
+                        $postsIndex = Route::has('posts.index') ? route('posts.index') : '#';
+                        $categoriesIndex = Route::has('categories.index') ? route('categories.index') : '#';
+                        $tagsIndex = Route::has('tags.index') ? route('tags.index') : '#';
+                        // Pages routes (guarded - fallback to '#')
+                        $pagesCreate = Route::has('pages.create') ? route('pages.create') : '#';
+                        $pagesIndex = Route::has('pages.index') ? route('pages.index') : '#';
+                        $pagesTemplates = Route::has('pages.templates') ? route('pages.templates') : '#';
+                        // Manages routes (users, roles, permissions)
+                        $usersIndex = Route::has('users.index') ? route('users.index') : '#';
+                        $rolesIndex = Route::has('roles.index') ? route('roles.index') : '#';
+                        $permissionsIndex = Route::has('permissions.index') ? route('permissions.index') : '#';
+                        // Media routes (guarded - fallback to '#')
+                        $mediaUpload = Route::has('media.upload') ? route('media.upload') : '#';
+                        $mediaIndex = Route::has('media.index') ? route('media.index') : '#';
+                    @endphp
                     <flux:navlist.item class="sidebar-item" icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-label="Dashboard" aria-label="Dashboard">
                         <span class="sidebar-label">Dashboard</span>
                         <span class="sr-only">Dashboard</span>
                     </flux:navlist.item>
+                    <!-- Posts group (Expanded) -->
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="Posts" icon="pencil-square" expandable :expanded="false" class="sidebar-item" data-label="Posts" aria-label="Posts">
+                            <flux:navlist.item href="{{ $postsCreate }}" wire:navigate>Add Post</flux:navlist.item>
+                            <flux:navlist.item href="{{ $postsIndex }}" wire:navigate>Post List</flux:navlist.item>
+                            <flux:navlist.item href="{{ $categoriesIndex }}" wire:navigate>Categories</flux:navlist.item>
+                            <flux:navlist.item href="{{ $tagsIndex }}" wire:navigate>Tags</flux:navlist.item>
+                        </flux:sidebar.group>
+                    </div>
+
+                    <!-- Pages group (Expanded) -->
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="Pages" icon="book-open-text" expandable :expanded="false" class="sidebar-item" data-label="Pages" aria-label="Pages">
+                            <flux:navlist.item href="{{ $pagesCreate }}" wire:navigate>Add Page</flux:navlist.item>
+                            <flux:navlist.item href="{{ $pagesIndex }}" wire:navigate>Page List</flux:navlist.item>
+                            <flux:navlist.item href="{{ $pagesTemplates }}" wire:navigate>Templates</flux:navlist.item>
+                        </flux:sidebar.group>
+                    </div>
+
+                    <!-- Media group (Expanded) -->
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="Media" icon="puzzle-piece" expandable :expanded="false" class="sidebar-item" data-label="Media" aria-label="Media">
+                            <flux:navlist.item href="{{ $mediaUpload }}" wire:navigate>Upload Media</flux:navlist.item>
+                            <flux:navlist.item href="{{ $mediaIndex }}" wire:navigate>Media Library</flux:navlist.item>
+                        </flux:sidebar.group>
+                    </div>
+
+                    <!-- Manages group (Expanded) -->
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="Manages" icon="user-group" expandable :expanded="false" class="sidebar-item" data-label="Manages" aria-label="Manages">
+                            <flux:navlist.item href="{{ $usersIndex }}" wire:navigate>Users</flux:navlist.item>
+                            <flux:navlist.item href="{{ $rolesIndex }}" wire:navigate>Roles</flux:navlist.item>
+                            <flux:navlist.item href="{{ $permissionsIndex }}" wire:navigate>Permissions</flux:navlist.item>
+                        </flux:sidebar.group>
+                    </div>
+
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="Settings" icon="cog" expandable :expanded="false" class="sidebar-item" data-label="Settings" aria-label="Settings">
+                            <flux:navlist.item :href="route('profile.edit')" wire:navigate>Profile</flux:navlist.item>
+                            <flux:navlist.item :href="route('password.edit')" wire:navigate>Password</flux:navlist.item>
+                            <flux:navlist.item :href="route('appearance.edit')" wire:navigate>Appearance</flux:navlist.item>
+                        </flux:sidebar.group>
+                    </div>
+
+                    <!-- Compact-only: Posts dropdown -->
+                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Posts">
+                        <flux:dropdown position="right" align="start">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open posts" data-compact-target="Posts">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item href="{{ $postsCreate }}" icon="plus" wire:navigate>Add Post</flux:menu.item>
+                                    <flux:menu.item href="{{ $postsIndex }}" icon="book-open-text" wire:navigate>Post List</flux:menu.item>
+                                    <flux:menu.item href="{{ $categoriesIndex }}" icon="folder" wire:navigate>Categories</flux:menu.item>
+                                    <flux:menu.item href="{{ $tagsIndex }}" icon="tag" wire:navigate>Tags</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+
+                    <!-- Compact-only: Pages dropdown -->
+                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Pages">
+                        <flux:dropdown position="right" align="start">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open pages" data-compact-target="Pages">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item href="{{ $pagesCreate }}" icon="plus" wire:navigate>Add Page</flux:menu.item>
+                                    <flux:menu.item href="{{ $pagesIndex }}" icon="book-open-text" wire:navigate>Page List</flux:menu.item>
+                                    <flux:menu.item href="{{ $pagesTemplates }}" icon="squares-2x2" wire:navigate>Templates</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+
+                    <!-- Compact-only: Media dropdown -->
+                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Media">
+                        <flux:dropdown position="right" align="start">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open media" data-compact-target="Media">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item href="{{ $mediaUpload }}" icon="plus" wire:navigate>Upload Media</flux:menu.item>
+                                    <flux:menu.item href="{{ $mediaIndex }}" icon="folder" wire:navigate>Media Library</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+
+                    <!-- Compact-only: Manages dropdown -->
+                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Manages">
+                        <flux:dropdown position="right" align="start">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open manages" data-compact-target="Manages">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item href="{{ $usersIndex }}" icon="user" wire:navigate>Users</flux:menu.item>
+                                    <flux:menu.item href="{{ $rolesIndex }}" icon="users" wire:navigate>Roles</flux:menu.item>
+                                    <flux:menu.item href="{{ $permissionsIndex }}" icon="key" wire:navigate>Permissions</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+
+                    <!-- Compact-only: show a single icon that opens a dropdown to the right of the sidebar -->
+                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Settings">
+                        <flux:dropdown position="right" align="start">
+                            <!-- Compact trigger: match other sidebar items sizing and centering -->
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open settings" data-compact-target="Settings">
+                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                            </button>
+
+                            <flux:menu>
+                                <flux:menu.radio.group>
+                                    <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate>Profile</flux:menu.item>
+                                    <flux:menu.item :href="route('password.edit')" icon="key" wire:navigate>Password</flux:menu.item>
+                                    <flux:menu.item :href="route('appearance.edit')" icon="paint-brush" wire:navigate>Appearance</flux:menu.item>
+                                </flux:menu.radio.group>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
             </flux:navlist>
 
             <flux:spacer />
@@ -343,6 +494,108 @@
                 // no-op
             }
         }
+        </script>
+        <script>
+        // Ensure compact/expanded-only elements toggle visibility even if CSS isn't applied yet
+        (function() {
+            function isCompact() {
+                try { return localStorage.getItem('sidebar-compact') === '1'; } catch (e) { return document.body.hasAttribute('data-sidebar-compact'); }
+            }
+
+            function updateCompactFallback() {
+                var compact = isCompact();
+                // Elements we control in Blade
+                var expanded = document.querySelectorAll('#sidebar .expanded-only');
+                var compactOnly = document.querySelectorAll('#sidebar .compact-only');
+
+                expanded.forEach(function(el){
+                    try { el.style.display = compact ? 'none' : ''; } catch (e) {}
+                });
+                compactOnly.forEach(function(el){
+                    try { el.style.display = compact ? '' : 'none'; } catch (e) {}
+                });
+                // Ensure the compact trigger shows the same icon as the expanded Settings group
+                try { syncCompactIcon(); } catch (e) {}
+            }
+
+            function syncCompactIcon() {
+                try {
+                    // For each compact trigger that declares a `data-compact-target`, try to copy
+                    // the SVG from the expanded group that has the matching `data-label`.
+                    var triggers = document.querySelectorAll('#sidebar .compact-only .compact-trigger[data-compact-target]');
+                    if (!triggers || !triggers.length) return;
+
+                    // Helper to locate the svg inside an expanded block by label
+                    function findExpandedSvg(label) {
+                        // data-label is on the flux:sidebar.group element inside the .expanded-only wrapper,
+                        // so search for that element anywhere inside the expanded-only container.
+                        var selectorBase = '#sidebar .expanded-only [data-label="' + CSS.escape(label) + '"]';
+                        var sel = selectorBase + ' [data-slot="icon"] svg, ' + selectorBase + ' [data-flux-icon] svg, ' + selectorBase + ' svg, ' + selectorBase + ' [data-flux-icon]';
+                        return document.querySelector(sel);
+                    }
+
+                    triggers.forEach(function(trigger) {
+                        try {
+                            var target = trigger.getAttribute('data-compact-target');
+                            if (!target) return;
+
+                            var src = findExpandedSvg(target);
+
+                            // retry a few times if not yet rendered by Flux
+                            var attempts = 0;
+                            function attemptCopy() {
+                                try {
+                                    attempts++;
+                                    if (!src) src = findExpandedSvg(target);
+                                    if (src) {
+                                        var srcMarkup = src.outerHTML.trim();
+                                        var existingSvg = trigger.querySelector('svg');
+                                        var existingMarkup = existingSvg ? existingSvg.outerHTML.trim() : '';
+                                        if (existingMarkup !== srcMarkup) {
+                                            trigger.innerHTML = srcMarkup;
+                                        }
+                                        return;
+                                    }
+                                } catch (e) {
+                                    // ignore per-item
+                                }
+                                if (attempts < 6) setTimeout(attemptCopy, 80);
+                            }
+
+                            attemptCopy();
+                        } catch (e) {
+                            // ignore per trigger
+                        }
+                    });
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            // Run once immediately and after relevant mutations
+            updateCompactFallback();
+
+            // Observe body attribute changes and sidebar wrapper mutations
+            try {
+                var obs = new MutationObserver(function(mutations){
+                    var relevant = false;
+                    mutations.forEach(function(m){
+                        if (m.type === 'attributes' && m.target === document.body && m.attributeName === 'data-sidebar-compact') relevant = true;
+                        if (m.type === 'attributes' && (m.target && (m.target.id === 'sidebar' || m.target.id === 'sidebar-wrapper'))) relevant = true;
+                        if (m.type === 'childList') relevant = true;
+                    });
+                    if (relevant) updateCompactFallback();
+                });
+
+                obs.observe(document.body, { attributes: true, attributeFilter: ['data-sidebar-compact'] });
+                var wrapper = document.getElementById('sidebar-wrapper') || document.getElementById('sidebar');
+                if (wrapper) obs.observe(wrapper, { attributes: true, childList: true, subtree: true });
+            } catch (e) {
+                // ignore
+            }
+            // Ensure icon sync on initial load
+            try { syncCompactIcon(); } catch (e) {}
+        })();
         </script>
         <script>
         // ENFORCE: MutationObserver that immediately reapplies saved compact state when other scripts
