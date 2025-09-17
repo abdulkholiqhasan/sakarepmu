@@ -62,22 +62,7 @@
                         </flux:sidebar.group>
                     </div>
 
-                    <!-- Manages group (Expanded) -->
-                    <div class="expanded-only">
-                        <flux:sidebar.group heading="Manages" icon="user-group" expandable :expanded="false" class="sidebar-item" data-label="Manages" aria-label="Manages">
-                            <flux:navlist.item href="{{ $usersIndex }}" wire:navigate>Users</flux:navlist.item>
-                            <flux:navlist.item href="{{ $rolesIndex }}" wire:navigate>Roles</flux:navlist.item>
-                            <flux:navlist.item href="{{ $permissionsIndex }}" wire:navigate>Permissions</flux:navlist.item>
-                        </flux:sidebar.group>
-                    </div>
-
-                    <div class="expanded-only">
-                        <flux:sidebar.group heading="Settings" icon="cog" expandable :expanded="false" class="sidebar-item" data-label="Settings" aria-label="Settings">
-                            <flux:navlist.item :href="route('profile.edit')" wire:navigate>Profile</flux:navlist.item>
-                            <flux:navlist.item :href="route('password.edit')" wire:navigate>Password</flux:navlist.item>
-                            <flux:navlist.item :href="route('appearance.edit')" wire:navigate>Appearance</flux:navlist.item>
-                        </flux:sidebar.group>
-                    </div>
+                    <!-- Manages and Settings moved to footer area -->
 
                     <!-- Compact-only: Posts dropdown -->
                     <div class="compact-only compact-sidebar-group sidebar-item" data-label="Posts">
@@ -133,8 +118,32 @@
                         </flux:dropdown>
                     </div>
 
-                    <!-- Compact-only: Manages dropdown -->
-                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Manages">
+                    <!-- Compact-only: (Manages and Settings will appear in footer area) -->
+            </flux:navlist>
+
+            <flux:spacer />
+
+            <!-- Footer menus grouped to reduce vertical spacing -->
+            <div class="space-y-1">
+                <div class="expanded-only">
+                    <flux:sidebar.group heading="Manages" icon="user-group" expandable :expanded="false" class="sidebar-item" data-label="Manages" aria-label="Manages">
+                        <flux:navlist.item href="{{ $usersIndex }}" wire:navigate>Users</flux:navlist.item>
+                        <flux:navlist.item href="{{ $rolesIndex }}" wire:navigate>Roles</flux:navlist.item>
+                        <flux:navlist.item href="{{ $permissionsIndex }}" wire:navigate>Permissions</flux:navlist.item>
+                    </flux:sidebar.group>
+                </div>
+
+                <div class="expanded-only">
+                    <flux:sidebar.group heading="Settings" icon="cog" expandable :expanded="false" class="sidebar-item" data-label="Settings" aria-label="Settings">
+                        <flux:navlist.item :href="route('profile.edit')" wire:navigate>Profile</flux:navlist.item>
+                        <flux:navlist.item :href="route('password.edit')" wire:navigate>Password</flux:navlist.item>
+                        <flux:navlist.item :href="route('appearance.edit')" wire:navigate>Appearance</flux:navlist.item>
+                    </flux:sidebar.group>
+                </div>
+
+                <!-- Compact-only footer grouped -->
+                <div class="compact-only flex flex-col space-y-1">
+                    <div class="compact-sidebar-group sidebar-item" data-label="Manages">
                         <flux:dropdown position="right" align="start">
                             <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open manages" data-compact-target="Manages">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
@@ -151,8 +160,7 @@
                         </flux:dropdown>
                     </div>
 
-                    <!-- Compact-only: show a single icon that opens a dropdown to the right of the sidebar -->
-                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Settings">
+                    <div class="compact-sidebar-group sidebar-item" data-label="Settings">
                         <flux:dropdown position="right" align="start">
                             <!-- Compact trigger: match other sidebar items sizing and centering -->
                             <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open settings" data-compact-target="Settings">
@@ -169,9 +177,8 @@
                             </flux:menu>
                         </flux:dropdown>
                     </div>
-            </flux:navlist>
-
-            <flux:spacer />
+                </div>
+            </div>
 
             <!-- Sidebar copyright/footer -->
             <div class="px-4 py-3 text-xs text-zinc-600 dark:text-zinc-400">
