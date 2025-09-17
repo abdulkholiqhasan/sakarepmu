@@ -26,6 +26,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{user}/edit', [App\Http\Controllers\Manage\UserController::class, 'edit'])->name('edit');
         Route::put('{user}', [App\Http\Controllers\Manage\UserController::class, 'update'])->name('update');
     });
+
+    Route::prefix('manage/roles')->name('roles.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Manage\RoleController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Manage\RoleController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Manage\RoleController::class, 'store'])->name('store');
+        Route::get('{role}/edit', [App\Http\Controllers\Manage\RoleController::class, 'edit'])->name('edit');
+        Route::put('{role}', [App\Http\Controllers\Manage\RoleController::class, 'update'])->name('update');
+    });
 });
 
 require __DIR__ . '/auth.php';
