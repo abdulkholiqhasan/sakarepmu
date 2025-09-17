@@ -34,6 +34,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('{role}/edit', [App\Http\Controllers\Manage\RoleController::class, 'edit'])->name('edit');
         Route::put('{role}', [App\Http\Controllers\Manage\RoleController::class, 'update'])->name('update');
     });
+
+    Route::prefix('manage/permissions')->name('permissions.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Manage\PermissionController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Manage\PermissionController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Manage\PermissionController::class, 'store'])->name('store');
+        Route::get('{permission}/edit', [App\Http\Controllers\Manage\PermissionController::class, 'edit'])->name('edit');
+        Route::put('{permission}', [App\Http\Controllers\Manage\PermissionController::class, 'update'])->name('update');
+    });
 });
 
 require __DIR__ . '/auth.php';

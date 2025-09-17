@@ -36,5 +36,20 @@ class Role extends Model
         'guard_name',
     ];
 
-    // Placeholder for relationships (permissions/users) if added later.
+    // Relationships
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class, 'permission_role', 'role_id', 'permission_id');
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'role_user', 'role_id', 'user_id');
+    }
+
+    // Helper: attach permission
+    public function givePermissionTo($permission)
+    {
+        $this->permissions()->syncWithoutDetaching([$permission instanceof Permission ? $permission->getKey() : $permission]);
+    }
 }
