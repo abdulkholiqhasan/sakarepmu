@@ -11,7 +11,9 @@ class PermissionController extends Controller
 {
     public function index()
     {
-        $permissions = Permission::orderBy('id', 'desc')->paginate(15);
+        $permissions = Permission::orderBy('id', 'desc')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('manage.permissions.index', compact('permissions'));
     }
@@ -48,5 +50,12 @@ class PermissionController extends Controller
         $permission->update($validated);
 
         return redirect()->route('permissions.index')->with('success', 'Permission updated successfully.');
+    }
+
+    public function destroy(Permission $permission)
+    {
+        $permission->delete();
+
+        return redirect()->route('permissions.index')->with('success', 'Permission deleted successfully.');
     }
 }

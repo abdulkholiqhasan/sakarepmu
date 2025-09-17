@@ -388,4 +388,58 @@ select:focus[data-flux-control] {
     body[data-sidebar-compact="1"] .compact-only {
         display: block !important;
     }
+
+    /* Button utilities used throughout manage views */
+    .btn {
+        @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-zinc-100 text-zinc-800 border border-transparent;
+    }
+
+    .btn:hover {
+        @apply shadow-sm;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-medium bg-indigo-600 text-white border border-transparent;
+    }
+
+    .btn-primary:hover {
+        @apply bg-indigo-700 shadow-sm;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center gap-2 px-3 py-1 rounded text-sm font-medium bg-white text-red-600 border border-red-100;
+    }
+
+    .btn-danger:hover {
+        @apply bg-red-50 shadow-sm;
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-white text-zinc-800 border border-zinc-200 hover:bg-zinc-50;
+    }
+
+    .btn:focus {
+        @apply outline-none ring-2 ring-offset-2 ring-indigo-300;
+    }
+
+    .btn[disabled],
+    .btn:disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    .btn-primary {
+        @apply bg-indigo-600 text-white hover:bg-indigo-700 border-transparent;
+    }
+
+    .btn-outline {
+        @apply bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50;
+    }
+
+    .btn-sm {
+        @apply px-2 py-0.5 text-xs rounded;
+    }
+
+    .btn-danger {
+        @apply bg-red-600 text-white hover:bg-red-700 border-transparent;
+    }
 }

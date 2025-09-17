@@ -2,35 +2,58 @@
     <div class="p-4">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-2xl font-semibold">Roles</h1>
-            <a href="{{ route('roles.create') }}" class="btn btn-primary">Create Role</a>
+            <a href="{{ route('roles.create') }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700">Create Role</a>
         </div>
 
         @if(session('success'))
             <div class="mb-4 text-green-600">{{ session('success') }}</div>
         @endif
 
-        <table class="w-full table-auto border-collapse">
-            <thead>
+        <div class="mb-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-sm text-zinc-500">Showing</div>
+                    <div class="font-medium text-zinc-900">{{ $roles->total() }} roles</div>
+                </div>
+                <div class="text-sm text-zinc-500">Page {{ $roles->currentPage() }} of {{ $roles->lastPage() }}</div>
+            </div>
+        </div>
+        <div class="overflow-x-auto bg-white border rounded-lg shadow">
+            <table class="w-full table-auto border-collapse text-sm">
+            <thead class="bg-zinc-50">
                 <tr>
-                    <th class="text-left p-2">ID</th>
-                    <th class="text-left p-2">Name</th>
-                    <th class="text-left p-2">Guard</th>
-                    <th class="text-left p-2">Actions</th>
+                    <th class="text-left p-3 text-xs text-zinc-500 uppercase">ID</th>
+                    <th class="text-left p-3 text-xs text-zinc-500 uppercase">Name</th>
+                    <th class="text-left p-3 text-xs text-zinc-500 uppercase">Guard</th>
+                    <th class="text-left p-3 text-xs text-zinc-500 uppercase">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($roles as $role)
+                @forelse($roles as $role)
                 <tr class="border-t">
                     <td class="p-2">{{ $role->getKey() }}</td>
                     <td class="p-2">{{ $role->name }}</td>
                     <td class="p-2">{{ $role->guard_name }}</td>
                     <td class="p-2">
-                        <a href="{{ route('roles.edit', $role) }}" class="text-blue-600">Edit</a>
+                        <div class="inline-flex items-center gap-2">
+                            <a href="{{ route('roles.edit', $role) }}" class="btn btn-primary">Edit</a>
+                            <form method="POST" action="{{ route('roles.destroy', $role) }}" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="4" class="p-4 text-center text-zinc-500">No roles to display.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
+
+        </div>
 
         <div class="mt-4">
             {{ $roles->links() }}

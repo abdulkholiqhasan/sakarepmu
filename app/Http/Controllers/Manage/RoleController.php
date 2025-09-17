@@ -11,14 +11,18 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::orderBy('id', 'desc')->paginate(15);
+        $roles = Role::orderBy('id', 'desc')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('manage.roles.index', compact('roles'));
     }
 
     public function create()
     {
-        return view('manage.roles.create');
+        $permissions = \App\Models\Manage\Permission::orderBy('name')->get();
+
+        return view('manage.roles.create', compact('permissions'));
     }
 
     public function store(Request $request)
@@ -30,12 +34,20 @@ class RoleController extends Controller
 
         $role = Role::create($validated);
 
+        // sync permissions if provided
+        $permissions = $request->input('permissions', []);
+        if (!empty($permissions)) {
+            $role->permissions()->sync($permissions);
+        }
+
         return redirect()->route('roles.index')->with('success', 'Role created successfully.');
     }
 
     public function edit(Role $role)
     {
-        return view('manage.roles.edit', compact('role'));
+        $permissions = \App\Models\Manage\Permission::orderBy('name')->get();
+
+        return view('manage.roles.edit', compact('role', 'permissions'));
     }
 
     public function update(Request $request, Role $role)
@@ -47,6 +59,17 @@ class RoleController extends Controller
 
         $role->update($validated);
 
+        // sync permissions
+        $permissions = $request->input('permissions', []);
+        $role->permissions()->sync($permissions);
+
         return redirect()->route('roles.index')->with('success', 'Role updated successfully.');
+    }
+
+    public function destroy(Role $role)
+    {
+        $role->delete();
+
+        return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
     }
 }

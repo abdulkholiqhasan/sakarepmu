@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\Manage\UserController::class, 'store'])->name('store');
         Route::get('{user}/edit', [App\Http\Controllers\Manage\UserController::class, 'edit'])->name('edit');
         Route::put('{user}', [App\Http\Controllers\Manage\UserController::class, 'update'])->name('update');
+        Route::delete('{user}', [App\Http\Controllers\Manage\UserController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('manage/roles')->name('roles.')->group(function () {
@@ -33,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\Manage\RoleController::class, 'store'])->name('store');
         Route::get('{role}/edit', [App\Http\Controllers\Manage\RoleController::class, 'edit'])->name('edit');
         Route::put('{role}', [App\Http\Controllers\Manage\RoleController::class, 'update'])->name('update');
+        Route::delete('{role}', [App\Http\Controllers\Manage\RoleController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('manage/permissions')->name('permissions.')->group(function () {
@@ -41,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\Manage\PermissionController::class, 'store'])->name('store');
         Route::get('{permission}/edit', [App\Http\Controllers\Manage\PermissionController::class, 'edit'])->name('edit');
         Route::put('{permission}', [App\Http\Controllers\Manage\PermissionController::class, 'update'])->name('update');
+        Route::delete('{permission}', [App\Http\Controllers\Manage\PermissionController::class, 'destroy'])->name('destroy');
     });
 });
 
