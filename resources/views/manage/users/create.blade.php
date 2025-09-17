@@ -3,12 +3,12 @@
             <div class="flex items-center justify-between mb-4">
             <div>
                 <h1 class="text-2xl font-semibold">Create User</h1>
-                <p class="text-sm text-zinc-600">Add a new user account to the application.</p>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300">Add a new user account to the application.</p>
             </div>
             <a href="{{ route('users.index') }}" class="btn btn-outline">Back to list</a>
         </div>
 
-        <div class="bg-white shadow-sm rounded p-6 border">
+        <div class="bg-white dark:bg-zinc-900 shadow-sm rounded p-6 border border-zinc-200 dark:border-zinc-700">
             <form method="POST" action="{{ route('users.store') }}" class="space-y-6">
                 @csrf
 
@@ -26,28 +26,28 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="name" class="block text-sm font-medium text-zinc-700">Name</label>
-                        <input id="name" name="name" value="{{ old('name') }}" class="w-full border rounded-md px-3 py-2" required />
+                        <input id="name" name="name" value="{{ old('name') }}" class="w-full border rounded-md px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700" required />
                     </div>
                     <div>
                         <label for="email" class="block text-sm font-medium text-zinc-700">Email</label>
-                        <input id="email" name="email" value="{{ old('email') }}" class="w-full border rounded-md px-3 py-2" required />
+                        <input id="email" name="email" value="{{ old('email') }}" class="w-full border rounded-md px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700" required />
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-zinc-700">Password</label>
-                        <input id="password" name="password" type="password" class="w-full border rounded-md px-3 py-2" required />
-                        <p class="text-xs text-zinc-500 mt-1">Password must be at least 8 characters.</p>
+                        <input id="password" name="password" type="password" class="w-full border rounded-md px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700" required />
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Password must be at least 8 characters.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-zinc-700">Roles</label>
                         <div class="mt-2 grid grid-cols-1 gap-2">
                             @foreach($roles as $role)
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="roles[]" value="{{ $role->getKey() }}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
-                                    <span class="text-sm">{{ $role->name }}</span>
+                                    <input type="checkbox" name="roles[]" value="{{ $role->getKey() }}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded bg-white dark:bg-zinc-900" />
+                                    <span class="text-sm text-zinc-800 dark:text-zinc-200">{{ $role->name }}</span>
                                 </label>
                             @endforeach
                         </div>
-                        <p class="text-xs text-zinc-500 mt-2">Select one or more roles for this user.</p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">Select one or more roles for this user.</p>
                     </div>
                 </div>
 

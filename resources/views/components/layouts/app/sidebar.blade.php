@@ -7,7 +7,7 @@
         <div class="flex min-h-screen">
             <div id="sidebar-wrapper" class="transition-all duration-200 ease-in-out">
                 <flux:sidebar id="sidebar" sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 h-full w-64 transition-all duration-200 ease-in-out">
-            <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
+            <flux:sidebar.toggle class="lg:hidden text-zinc-800 dark:text-white/80" icon="x-mark" />
 
             <a href="/" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
@@ -71,7 +71,7 @@
                     <!-- Compact-only: Posts dropdown -->
                     <div class="compact-only compact-sidebar-group sidebar-item" data-label="Posts">
                         <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open posts" data-compact-target="Posts">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open posts" data-compact-target="Posts">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -90,7 +90,7 @@
                     <!-- Compact-only: Pages dropdown -->
                     <div class="compact-only compact-sidebar-group sidebar-item" data-label="Pages">
                         <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open pages" data-compact-target="Pages">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open pages" data-compact-target="Pages">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -108,7 +108,7 @@
                     <!-- Compact-only: Media dropdown -->
                     <div class="compact-only compact-sidebar-group sidebar-item" data-label="Media">
                         <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open media" data-compact-target="Media">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open media" data-compact-target="Media">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -157,7 +157,7 @@
                 <div class="compact-only flex flex-col space-y-1">
                     <div class="compact-sidebar-group sidebar-item" data-label="Appearance">
                         <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open appearance" data-compact-target="Appearance">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open appearance" data-compact-target="Appearance">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -173,7 +173,7 @@
                     </div>
                     <div class="compact-sidebar-group sidebar-item" data-label="Manages">
                         <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open manages" data-compact-target="Manages">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open manages" data-compact-target="Manages">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -191,7 +191,7 @@
                     <div class="compact-sidebar-group sidebar-item" data-label="Settings">
                         <flux:dropdown position="right" align="start">
                             <!-- Compact trigger: match other sidebar items sizing and centering -->
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-label="Open settings" data-compact-target="Settings">
+                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open settings" data-compact-target="Settings">
                                 <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
                                 <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
                             </button>
@@ -220,8 +220,8 @@
                     <!-- Horizontal Navbar (Desktop): minimize di kiri, profile di kanan -->
                     <nav class="hidden lg:flex items-center justify-between px-6 h-16 border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 relative z-20">
                         <div>
-                            <button id="sidebar-minimize-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800" aria-pressed="false">
-                                <svg id="sidebar-minimize-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-200" viewBox="0 0 24 24" aria-hidden="true">
+                            <button id="sidebar-minimize-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-white/80" aria-pressed="false">
+                                <svg id="sidebar-minimize-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <!-- Modern hamburger (default) toggles to X when compact -->
                                     <!-- We keep the same path id so existing JS continues to work -->
                                     <path id="sidebar-minimize-path" fill-rule="evenodd" clip-rule="evenodd" d="M4 6.75C4 6.33579 4.33579 6 4.75 6H19.25C19.6642 6 20 6.33579 20 6.75C20 7.16421 19.6642 7.5 19.25 7.5H4.75C4.33579 7.5 4 7.16421 4 6.75ZM4 12C4 11.5858 4.33579 11.25 4.75 11.25H19.25C19.6642 11.25 20 11.5858 20 12C20 12.4142 19.6642 12.75 19.25 12.75H4.75C4.33579 12.75 4 12.4142 4 12ZM4.75 16.5C4.33579 16.5 4 16.8358 4 17.25C4 17.6642 4.33579 18 4.75 18H19.25C19.6642 18 20 17.6642 20 17.25C20 16.8358 19.6642 16.5 19.25 16.5H4.75Z" />
@@ -281,7 +281,7 @@
 
                 <!-- Mobile User Menu -->
                 <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            <flux:sidebar.toggle class="lg:hidden text-zinc-800 dark:text-white/80" icon="bars-2" inset="left" />
 
             <flux:spacer />
 
