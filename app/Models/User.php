@@ -22,6 +22,13 @@ class User extends Authenticatable
             }
         });
     }
+    /**
+     * The primary key is a UUID string, not an incrementing integer.
+     */
+    public $incrementing = false;
+
+    protected $keyType = 'string';
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 

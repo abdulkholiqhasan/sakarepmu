@@ -17,6 +17,15 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
+    // User management routes
+    // These are standard controllers so the sidebar helper (Route::has('users.index')) can resolve them.
+    Route::prefix('manage/users')->name('users.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Manage\UserController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Manage\UserController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Manage\UserController::class, 'store'])->name('store');
+        Route::get('{user}/edit', [App\Http\Controllers\Manage\UserController::class, 'edit'])->name('edit');
+        Route::put('{user}', [App\Http\Controllers\Manage\UserController::class, 'update'])->name('update');
+    });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
