@@ -45,6 +45,26 @@ Route::middleware(['auth'])->group(function () {
         Route::put('{permission}', [App\Http\Controllers\Manage\PermissionController::class, 'update'])->name('update');
         Route::delete('{permission}', [App\Http\Controllers\Manage\PermissionController::class, 'destroy'])->name('destroy');
     });
+
+    // Blog categories for posts (CRUD)
+    Route::prefix('manage/posts/categories')->name('categories.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Blog\CategoryController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Blog\CategoryController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Blog\CategoryController::class, 'store'])->name('store');
+        Route::get('{category}/edit', [App\Http\Controllers\Blog\CategoryController::class, 'edit'])->name('edit');
+        Route::put('{category}', [App\Http\Controllers\Blog\CategoryController::class, 'update'])->name('update');
+        Route::delete('{category}', [App\Http\Controllers\Blog\CategoryController::class, 'destroy'])->name('destroy');
+    });
+
+    // Blog tags for posts (CRUD)
+    Route::prefix('manage/posts/tags')->name('tags.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Blog\TagController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Blog\TagController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Blog\TagController::class, 'store'])->name('store');
+        Route::get('{tag}/edit', [App\Http\Controllers\Blog\TagController::class, 'edit'])->name('edit');
+        Route::put('{tag}', [App\Http\Controllers\Blog\TagController::class, 'update'])->name('update');
+        Route::delete('{tag}', [App\Http\Controllers\Blog\TagController::class, 'destroy'])->name('destroy');
+    });
 });
 
 require __DIR__ . '/auth.php';
