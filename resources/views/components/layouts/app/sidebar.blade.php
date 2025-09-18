@@ -28,7 +28,7 @@
                         $rolesIndex = Route::has('roles.index') ? route('roles.index') : '#';
                         $permissionsIndex = Route::has('permissions.index') ? route('permissions.index') : '#';
                         // Media routes (guarded - fallback to '#')
-                        $mediaUpload = Route::has('media.upload') ? route('media.upload') : '#';
+                        $mediaUpload = Route::has('media.create') ? route('media.create') : '#';
                         $mediaIndex = Route::has('media.index') ? route('media.index') : '#';
                         // Appearance routes (guarded - fallback to '#')
                         $appearanceThemes = Route::has('appearance.themes') ? route('appearance.themes') : '#';
