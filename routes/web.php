@@ -87,8 +87,16 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('{page}', [App\Http\Controllers\Blog\PagesController::class, 'destroy'])->name('destroy');
     });
 
-    // Media library API for browsing uploads
-    Route::get('manage/media', [App\Http\Controllers\MediaController::class, 'index']);
+    // Media library (CRUD)
+    Route::prefix('manage/media')->name('media.')->group(function () {
+        Route::get('/', [App\Http\Controllers\MediaController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\MediaController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\MediaController::class, 'store'])->name('store');
+        Route::get('{media}', [App\Http\Controllers\MediaController::class, 'show'])->name('show');
+        Route::get('{media}/edit', [App\Http\Controllers\MediaController::class, 'edit'])->name('edit');
+        Route::put('{media}', [App\Http\Controllers\MediaController::class, 'update'])->name('update');
+        Route::delete('{media}', [App\Http\Controllers\MediaController::class, 'destroy'])->name('destroy');
+    });
 });
 
 require __DIR__ . '/auth.php';
