@@ -82,6 +82,20 @@ composer.phar
 /storage/app/uploads
 /storage/temp
 
+# Explicit upload paths (ensure user-uploaded files are never committed)
+# Common Laravel upload/storage locations
+/storage/app/public/
+/storage/app/uploads/
+/storage/pail/
+/storage/temp/
+
+# If your app stores user files in public/uploads or public/storage uploads
+/public/uploads/
+/public/storage/
+
+# Ignore any files placed in `storage` root just in case
+/storage/*
+
 # Ignore SQLite DB
 /database/*.sqlite
 
