@@ -42,7 +42,7 @@
                         </div>
 
                         <div class="mb-4 bg-white dark:bg-zinc-900 rounded border p-4 dark:border-zinc-700">
-                            <flux:textarea name="content" :label="__('Content')">{{ old('content') }}</flux:textarea>
+                            @include('components.wysiwyg', ['name' => 'content', 'value' => old('content')])
                             @error('content') <p class="text-red-600 dark:text-red-300 mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>

@@ -13,7 +13,7 @@
     </div>
 
     <div>
-        <flux:textarea name="content" :label="__('Content')">{{ old('content', $page->content ?? '') }}</flux:textarea>
+        @include('components.wysiwyg', ['name' => 'content', 'value' => old('content', $page->content ?? '')])
         @error('content') <p class="text-red-600 dark:text-red-300 mt-1">{{ $message }}</p> @enderror
     </div>
 

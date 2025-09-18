@@ -46,6 +46,15 @@
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
+
+    /* Ensure valid text-size-adjust declarations are emitted in the build
+       to avoid browser parse warnings for -webkit-text-size-adjust. */
+    html,
+    :host {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
 }
 
 [data-flux-field]:not(ui-radio, ui-checkbox) {

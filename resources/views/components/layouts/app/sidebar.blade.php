@@ -334,7 +334,8 @@
             </div> <!-- end flex-1 -->
         </div> <!-- end flex -->
 
-        @fluxScripts
+    @stack('scripts')
+    @fluxScripts
         <!-- Sidebar styles moved to `resources/css/app.css` under @layer components { /* Sidebar compact ... */ } -->
         <script>
         // Sidebar minimize/compact logic with accessibility and resilience to DOM updates
