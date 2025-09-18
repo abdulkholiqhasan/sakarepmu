@@ -54,7 +54,6 @@
                         <flux:sidebar.group heading="Pages" icon="book-open-text" expandable :expanded="false" class="sidebar-item" data-label="Pages" aria-label="Pages">
                             <flux:navlist.item href="{{ $pagesCreate }}" wire:navigate>Add Page</flux:navlist.item>
                             <flux:navlist.item href="{{ $pagesIndex }}" wire:navigate>Page List</flux:navlist.item>
-                            <flux:navlist.item href="{{ $pagesTemplates }}" wire:navigate>Templates</flux:navlist.item>
                         </flux:sidebar.group>
                     </div>
 
@@ -99,7 +98,6 @@
                                 <flux:menu.radio.group>
                                     <flux:menu.item href="{{ $pagesCreate }}" icon="plus" wire:navigate>Add Page</flux:menu.item>
                                     <flux:menu.item href="{{ $pagesIndex }}" icon="book-open-text" wire:navigate>Page List</flux:menu.item>
-                                    <flux:menu.item href="{{ $pagesTemplates }}" icon="squares-2x2" wire:navigate>Templates</flux:menu.item>
                                 </flux:menu.radio.group>
                             </flux:menu>
                         </flux:dropdown>

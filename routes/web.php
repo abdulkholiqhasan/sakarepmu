@@ -65,6 +65,30 @@ Route::middleware(['auth'])->group(function () {
         Route::put('{tag}', [App\Http\Controllers\Blog\TagController::class, 'update'])->name('update');
         Route::delete('{tag}', [App\Http\Controllers\Blog\TagController::class, 'destroy'])->name('destroy');
     });
+
+    // Blog posts (CRUD)
+    Route::prefix('manage/posts/posts')->name('posts.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Blog\PostController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Blog\PostController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Blog\PostController::class, 'store'])->name('store');
+        Route::get('{post}/edit', [App\Http\Controllers\Blog\PostController::class, 'edit'])->name('edit');
+        Route::put('{post}', [App\Http\Controllers\Blog\PostController::class, 'update'])->name('update');
+        Route::delete('{post}', [App\Http\Controllers\Blog\PostController::class, 'destroy'])->name('destroy');
+    });
+
+    // Blog pages (CRUD)
+    Route::prefix('manage/pages')->name('pages.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Blog\PagesController::class, 'index'])->name('index');
+        Route::get('create', [App\Http\Controllers\Blog\PagesController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Blog\PagesController::class, 'store'])->name('store');
+        Route::get('{page}', [App\Http\Controllers\Blog\PagesController::class, 'show'])->name('show');
+        Route::get('{page}/edit', [App\Http\Controllers\Blog\PagesController::class, 'edit'])->name('edit');
+        Route::put('{page}', [App\Http\Controllers\Blog\PagesController::class, 'update'])->name('update');
+        Route::delete('{page}', [App\Http\Controllers\Blog\PagesController::class, 'destroy'])->name('destroy');
+    });
+
+    // Media library API for browsing uploads
+    Route::get('manage/media', [App\Http\Controllers\MediaController::class, 'index']);
 });
 
 require __DIR__ . '/auth.php';
