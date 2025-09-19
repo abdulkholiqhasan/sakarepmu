@@ -66,15 +66,104 @@
                         <div class="bg-white dark:bg-zinc-800 p-4 rounded border dark:border-zinc-700">
                             <h3 class="font-medium text-sm text-gray-700 dark:text-zinc-200 mb-2">Categories</h3>
                             <div class="mt-2">
-                                <input type="text" id="category-search" placeholder="Search categories..." class="w-full px-3 py-2 mb-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-gray-100">
-                                <div id="categories-list" class="max-h-48 overflow-auto rounded-md border border-gray-100 dark:border-gray-800 p-2 bg-white dark:bg-gray-900">
-                                    @foreach($categories as $category)
-                                        <label class="flex items-center space-x-2 py-1 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800">
-                                            <input type="checkbox" name="categories[]" value="{{ $category->id }}" class="category-checkbox" {{ in_array($category->id, old('categories', $post->categories->pluck('id')->toArray())) ? 'checked' : '' }} />
-                                            <span class="text-sm text-gray-700 dark:text-gray-200">{{ $category->name }}</span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                                    <!-- Hidden native select to keep form compatibility -->
+                                    <select id="categories-select" name="categories[]" multiple class="hidden">
+                                        @php
+                                            $selected = old('categories', $post->categories->pluck('id')->toArray());
+                                        @endphp
+                                        @foreach($categories as $option)
+                                            <option value="{{ $option->id }}" {{ in_array($option->id, $selected) ? 'selected' : '' }}>{{ $option->name }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <!-- Custom dropdown trigger -->
+                                    <div class="relative">
+                                        <button type="button" id="categories-toggle" class="w-full text-left px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-zinc-900 dark:border-zinc-700">
+                                            Select categories
+                                            <span class="float-right">▾</span>
+                                        </button>
+
+                                        <div id="categories-dropdown" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded shadow max-h-48 overflow-auto hidden z-50">
+                                            <ul class="divide-y divide-gray-100 dark:divide-zinc-800">
+                                                @foreach($categories as $option)
+                                                    <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer" data-id="{{ $option->id }}">{{ $option->name }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- Selected chips -->
+                                    <div id="selected-categories" class="mt-2 flex flex-wrap gap-2"></div>
+
+                                    <script>
+                                        (function(){
+                                            const select = document.getElementById('categories-select');
+                                            const toggle = document.getElementById('categories-toggle');
+                                            const dropdown = document.getElementById('categories-dropdown');
+                                            const container = document.getElementById('selected-categories');
+
+                                            function getOptionElement(id){
+                                                return dropdown.querySelector('[data-id="'+id+'"]');
+                                            }
+
+                                            function renderSelected(){
+                                                container.innerHTML = '';
+                                                const selected = Array.from(select.selectedOptions).map(opt => ({id: opt.value, name: opt.text}));
+                                                selected.forEach(item => {
+                                                    const span = document.createElement('span');
+                                                    span.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+                                                    span.textContent = item.name;
+                                                    // add remove button
+                                                    const btn = document.createElement('button');
+                                                    btn.type = 'button';
+                                                    btn.className = 'ml-2 text-xs text-indigo-700 dark:text-indigo-300';
+                                                    btn.textContent = '×';
+                                                    btn.addEventListener('click', function(e){
+                                                        e.preventDefault();
+                                                        // unselect in native select
+                                                        const opt = Array.from(select.options).find(o => o.value === item.id);
+                                                        if(opt) opt.selected = false;
+                                                        // update
+                                                        renderSelected();
+                                                    });
+                                                    span.appendChild(btn);
+                                                    container.appendChild(span);
+                                                });
+                                            }
+
+                                            function toggleDropdown(){
+                                                dropdown.classList.toggle('hidden');
+                                            }
+
+                                            // click option in dropdown toggles selection
+                                            dropdown.addEventListener('click', function(e){
+                                                const li = e.target.closest('li[data-id]');
+                                                if(!li) return;
+                                                const id = li.getAttribute('data-id');
+                                                const opt = Array.from(select.options).find(o => o.value === id);
+                                                if(opt) opt.selected = !opt.selected;
+                                                renderSelected();
+                                                // close dropdown after selection so user can reopen to add more
+                                                dropdown.classList.add('hidden');
+                                            });
+
+                                            toggle.addEventListener('click', function(e){
+                                                e.stopPropagation();
+                                                toggleDropdown();
+                                            });
+
+                                            // close on outside click
+                                            document.addEventListener('click', function(e){
+                                                if(!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && e.target !== toggle){
+                                                    dropdown.classList.add('hidden');
+                                                }
+                                            });
+
+                                            // initialize display on load
+                                            document.addEventListener('DOMContentLoaded', renderSelected);
+                                            renderSelected();
+                                        })();
+                                    </script>
                             </div>
                         </div>
 
