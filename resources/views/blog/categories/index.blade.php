@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = __('Categories'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-4">
         <div class="mb-3">
             <div class="flex items-start justify-between">

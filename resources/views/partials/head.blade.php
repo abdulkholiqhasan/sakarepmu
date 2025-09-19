@@ -3,7 +3,25 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<title>{{ $title ?? config('app.name') }}</title>
+@php
+	// Prefer an explicit page title provided via a Blade section 'title',
+	// otherwise fall back to $pageTitle or $title. If still empty and this is
+	// the homepage prefer the site tagline. This lets child views define
+	// `@section('title', '...')` which will be available to the parent layout
+	// when composing the <title>.
+	$site = config('app.name');
+	$sectionTitle = trim($__env->yieldContent('title'));
+
+	$page = $sectionTitle !== '' ? $sectionTitle : ($pageTitle ?? $title ?? null);
+
+	if (! $page && (request()->routeIs('home') || request()->is('/'))) {
+		$page = data_get(config('app'), 'tagline') ?: null;
+	}
+
+	$fullTitle = $page ? ($site . ' - ' . $page) : $site;
+@endphp
+
+<title>{{ $fullTitle }}</title>
 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">

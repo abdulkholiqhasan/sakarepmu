@@ -20,6 +20,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     public bool $remember = false;
 
+    // Page title forwarded to the layout so head can render "Site Title - Page Title".
+    public string $title = '';
+
     /**
      * Handle an incoming authentication request.
      */
@@ -37,8 +40,6 @@ new #[Layout('components.layouts.auth')] class extends Component {
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
-        Session::regenerate();
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
@@ -71,7 +72,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
     }
+    public function mount(): void
+    {
+        $this->title = __('Log in');
+    }
 }; ?>
+
+<?php $title = __('Log in'); ?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />

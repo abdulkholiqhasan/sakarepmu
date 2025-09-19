@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = __('Edit Tag'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-6 flex justify-center">
         <div class="w-full max-w-xl bg-white dark:bg-zinc-800 shadow rounded p-6">
             <h1 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Edit Tag</h1>

@@ -1,4 +1,10 @@
 {
     "Settings": "Settings",
+    "General": "General",
+    "Site Title": "Site Title",
+    "Tagline": "Tagline",
+    "Site URL": "Site URL",
+    "Admin Email": "Admin Email",
+    "Timezone": "Timezone",
     "Log Out": "Log Out"
 }

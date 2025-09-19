@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = __('Edit Post'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-6">
         <div class="mx-auto w-full max-w-6xl bg-white dark:bg-zinc-800 shadow rounded p-8">
             <h1 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Edit Post</h1>

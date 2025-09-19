@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Media')">
+<x-layouts.app :title="__('Media Library')">
     <div class="p-4">
         <div class="max-w-3xl">
             <div class="mb-4 flex items-start gap-4">

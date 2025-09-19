@@ -14,6 +14,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
 
+    // Page title forwarded to the layout so head can render "Site Title - Page Title".
+    public string $title = '';
+
     /**
      * Handle an incoming registration request.
      */
@@ -33,7 +36,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
     }
+
+    public function mount(): void
+    {
+        $this->title = __('Create an account');
+    }
 }; ?>
+
+<?php $title = __('Create an account'); ?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />

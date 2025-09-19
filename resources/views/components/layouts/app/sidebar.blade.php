@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
+        @php
+            $sectionTitle = trim($__env->yieldContent('title'));
+            $pageTitle = $sectionTitle !== '' ? $sectionTitle : ($title ?? null);
+        @endphp
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
@@ -147,6 +151,7 @@
                     <flux:sidebar.group heading="Settings" icon="cog" expandable :expanded="false" class="sidebar-item" data-label="Settings" aria-label="Settings">
                         <flux:navlist.item :href="route('profile.edit')" wire:navigate>Profile</flux:navlist.item>
                         <flux:navlist.item :href="route('password.edit')" wire:navigate>Password</flux:navlist.item>
+                        <flux:navlist.item :href="route('general.edit')" wire:navigate>General</flux:navlist.item>
                         <flux:navlist.item :href="route('appearance.edit')" wire:navigate>Appearance</flux:navlist.item>
                     </flux:sidebar.group>
                 </div>
@@ -196,9 +201,10 @@
 
                             <flux:menu>
                                 <flux:menu.radio.group>
-                                    <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate>Profile</flux:menu.item>
-                                    <flux:menu.item :href="route('password.edit')" icon="key" wire:navigate>Password</flux:menu.item>
-                                    <flux:menu.item :href="route('appearance.edit')" icon="paint-brush" wire:navigate>Appearance</flux:menu.item>
+                        <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate>Profile</flux:menu.item>
+                        <flux:menu.item :href="route('password.edit')" icon="key" wire:navigate>Password</flux:menu.item>
+                        <flux:menu.item :href="route('general.edit')" icon="globe-alt" wire:navigate>General</flux:menu.item>
+                        <flux:menu.item :href="route('appearance.edit')" icon="paint-brush" wire:navigate>Appearance</flux:menu.item>
                                 </flux:menu.radio.group>
                             </flux:menu>
                         </flux:dropdown>
@@ -206,10 +212,7 @@
                 </div>
             </div>
 
-            <!-- Sidebar copyright/footer -->
-            <div class="px-4 py-3 text-xs text-zinc-600 dark:text-zinc-400">
-                &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
-            </div>
+            <!-- Sidebar copyright/footer (moved to horizontal footer for consistency) -->
 
                 </flux:sidebar>
             </div>
@@ -331,6 +334,19 @@
                 <div class="flex-1">
                     {{ $slot }}
                 </div>
+
+                <!-- Horizontal footer (moved from sidebar for consistency) -->
+                <footer class="w-full border-t border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
+                    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
+                        <div>
+                            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                        </div>
+                        <div class="hidden sm:flex items-center gap-4">
+                            <a href="/privacy" class="hover:underline">Privacy</a>
+                            <a href="/terms" class="hover:underline">Terms</a>
+                        </div>
+                    </div>
+                </footer>
             </div> <!-- end flex-1 -->
         </div> <!-- end flex -->
 

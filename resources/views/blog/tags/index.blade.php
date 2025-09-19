@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = __('Tags'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-6">
         <div class="mb-4">
             <div class="flex items-start justify-between">

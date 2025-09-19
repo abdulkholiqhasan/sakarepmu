@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
+    Volt::route('settings/general', 'settings.general')->name('general.edit');
     // User management routes
     // These are standard controllers so the sidebar helper (Route::has('users.index')) can resolve them.
     Route::prefix('manage/users')->name('users.')->group(function () {

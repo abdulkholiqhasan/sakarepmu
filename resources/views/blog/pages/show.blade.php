@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = $page->title ?? __('Page'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-6">
         <div class="mx-auto w-full max-w-4xl bg-white dark:bg-zinc-800 shadow rounded p-8">
             <div class="mb-6 flex items-start justify-between">

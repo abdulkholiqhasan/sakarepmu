@@ -7,6 +7,9 @@ use Livewire\Volt\Component;
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $email = '';
 
+    // Page title forwarded to the layout so head can render "Site Title - Page Title".
+    public string $title = '';
+
     /**
      * Send a password reset link to the provided email address.
      */
@@ -20,7 +23,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         session()->flash('status', __('A reset link will be sent if the account exists.'));
     }
+    public function mount(): void
+    {
+        $this->title = __('Forgot password');
+    }
 }; ?>
+
+<?php $title = __('Forgot password'); ?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />

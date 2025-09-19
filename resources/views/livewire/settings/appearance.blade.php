@@ -6,6 +6,8 @@ new class extends Component {
     //
 }; ?>
 
+@section('title', __('Appearance'))
+
 <section class="w-full">
     @include('partials.settings-heading')
 

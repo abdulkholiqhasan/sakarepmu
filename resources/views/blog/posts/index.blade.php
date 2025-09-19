@@ -1,4 +1,5 @@
-<x-layouts.app>
+<?php $title = __('Post List'); ?>
+<x-layouts.app :title="$title ?? null">
     <div class="p-6">
         <div class="mb-4 flex items-start justify-between">
             <div>

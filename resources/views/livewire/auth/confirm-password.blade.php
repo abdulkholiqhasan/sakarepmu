@@ -8,6 +8,9 @@ use Livewire\Volt\Component;
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
 
+    // Page title forwarded to the layout so head can render "Site Title - Page Title".
+    public string $title = '';
+
     /**
      * Confirm the current user's password.
      */
@@ -29,6 +32,10 @@ new #[Layout('components.layouts.auth')] class extends Component {
         session(['auth.password_confirmed_at' => time()]);
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    }
+    public function mount(): void
+    {
+        $this->title = __('Confirm password');
     }
 }; ?>
 

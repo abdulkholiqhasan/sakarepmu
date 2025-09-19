@@ -37,6 +37,8 @@ new class extends Component {
     }
 }; ?>
 
+@section('title', __('Update password'))
+
 <section class="w-full">
     @include('partials.settings-heading')
 

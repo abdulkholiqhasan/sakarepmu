@@ -39,6 +39,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
             return;
         }
     }
+    // Page title forwarded to the layout so head can render "Site Title - Page Title".
+    public string $title = '';
+
+    public function mount(): void
+    {
+        $this->title = __('Verify email');
+    }
 }; ?>
 
 <div class="mt-4 flex flex-col gap-6">
