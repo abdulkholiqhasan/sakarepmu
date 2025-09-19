@@ -15,7 +15,7 @@ class CategoryController extends Controller
 
         $categories = Category::when($q, function ($query, $q) {
             $query->where('name', 'like', "%{$q}%");
-        })->orderBy('name')->paginate(20)->withQueryString();
+        })->orderBy('name')->paginate(10)->withQueryString();
 
         return view('blog.categories.index', compact('categories'));
     }

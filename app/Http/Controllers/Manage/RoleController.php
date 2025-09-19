@@ -12,7 +12,7 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::orderBy('id', 'desc')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return view('manage.roles.index', compact('roles'));

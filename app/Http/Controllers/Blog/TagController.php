@@ -14,7 +14,7 @@ class TagController extends Controller
 
         $tags = Tag::when($q, function ($query, $q) {
             $query->where('name', 'like', "%{$q}%");
-        })->orderBy('name')->paginate(20)->withQueryString();
+        })->orderBy('name')->paginate(10)->withQueryString();
 
         return view('blog.tags.index', compact('tags'));
     }

@@ -11,7 +11,7 @@ class PagesController extends Controller
 {
     public function index()
     {
-        $pages = Page::orderBy('created_at', 'desc')->paginate(15);
+        $pages = Page::orderBy('created_at', 'desc')->paginate(10);
         return view('blog.pages.index', compact('pages'));
     }
 

@@ -398,6 +398,29 @@ select:focus[data-flux-control] {
         display: block !important;
     }
 
+    /* Hide small 'Showing ... results' paragraph variants used in list footers
+       Target specific Tailwind class combinations to avoid hiding other text. */
+    p.text-sm.text-gray-700.leading-5.dark\:text-gray-400,
+    p.text-sm.text-gray-500.dark\:text-zinc-400 {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Fallback: attribute selector for exact class strings used in templates.
+        This targets only the specific paragraph combinations and avoids
+        interfering with Tailwind @apply rules or variant syntax parsing. */
+    p[class="text-sm text-gray-700 leading-5 dark:text-gray-400"],
+    p[class="text-sm text-gray-500 dark:text-zinc-400"] {
+        display: none !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
     /* Button utilities used throughout manage views */
     .btn {
         @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-zinc-100 text-zinc-800 border border-transparent;

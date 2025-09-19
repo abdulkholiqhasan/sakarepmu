@@ -17,7 +17,7 @@ class PostController extends Controller
         $posts = Post::query()
             ->when($q, fn($qB) => $qB->where('title', 'like', "%{$q}%"))
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->paginate(10);
 
         return view('blog.posts.index', compact('posts'));
     }

@@ -18,7 +18,7 @@ class MediaController extends Controller
             $query->where('filename', 'like', '%' . $request->input('q') . '%');
         }
 
-        $media = $query->orderBy('created_at', 'desc')->paginate(20);
+        $media = $query->orderBy('created_at', 'desc')->paginate(10);
 
         if ($request->wantsJson()) {
             return response()->json($media);
