@@ -37,6 +37,21 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
+test('users can authenticate using username', function () {
+    $user = User::factory()->create();
+
+    $response = LivewireVolt::test('auth.login')
+        ->set('email', $user->username)
+        ->set('password', 'password')
+        ->call('login');
+
+    $response
+        ->assertHasNoErrors()
+        ->assertRedirect(route('dashboard', absolute: false));
+
+    $this->assertAuthenticated();
+});
+
 test('users can logout', function () {
     $user = User::factory()->create();
 
