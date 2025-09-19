@@ -16,4 +16,20 @@ class Media extends Model
         'size',
         'user_id',
     ];
+
+    /**
+     * Casts
+     */
+    protected $casts = [
+        'size' => 'integer',
+        'user_id' => 'string',
+    ];
+
+    /**
+     * Owner relationship
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

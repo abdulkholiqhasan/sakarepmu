@@ -54,13 +54,33 @@ class MediaController extends Controller
         // Then store the file
         $path = $file->storeAs($storageDir, $originalName, 'public');
 
-        $media = Media::create([
-            'filename' => $originalName,
-            'path' => $path,
-            'mime_type' => $file->getClientMimeType(),
-            'size' => $file->getSize(),
-            'user_id' => $request->user()?->id,
-        ]);
+        try {
+            $media = Media::create([
+                'filename' => $originalName,
+                'path' => $path,
+                'mime_type' => $file->getClientMimeType(),
+                'size' => $file->getSize(),
+                'user_id' => $request->user()?->id,
+            ]);
+        } catch (\Throwable $e) {
+            // If DB insert fails, delete the stored file to avoid orphan files
+            try {
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
+                }
+            } catch (\Throwable $_) {
+                // ignore storage delete errors
+            }
+
+            // Log the original exception and return an error to the user
+            logger()->error('Failed to create media record after storing file', [
+                'exception' => $e,
+                'path' => $path,
+                'user_id' => $request->user()?->id,
+            ]);
+
+            return back()->withErrors(['file' => 'Upload failed (internal error). Please try again.']);
+        }
 
         return redirect()->route('media.index')->with('success', 'File uploaded');
     }
