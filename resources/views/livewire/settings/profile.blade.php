@@ -8,6 +8,7 @@ use Livewire\Volt\Component;
 
 new class extends Component {
     public string $name = '';
+    public string $username = '';
     public string $email = '';
 
     /**
@@ -16,6 +17,7 @@ new class extends Component {
     public function mount(): void
     {
         $this->name = Auth::user()->name;
+        $this->username = Auth::user()->username;
         $this->email = Auth::user()->email;
     }
 
@@ -26,23 +28,40 @@ new class extends Component {
     {
         $user = Auth::user();
 
-        $validated = $this->validate([
+        // Base rules always applied
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
+        ];
 
-            'email' => [
+        // Only validate email if the user is changing it (case-insensitive)
+        if (strtolower($this->email) !== strtolower($user->email ?? '')) {
+            $rules['email'] = [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
-        ]);
+                Rule::unique(User::class)->ignore($user->id),
+            ];
+        }
+
+        $validated = $this->validate($rules);
 
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
+        }
+
+        // If the email was changed, ensure the domain accepts mail (MX record).
+        if (! empty($validated['email'] ?? '') && ! app()->environment('testing')) {
+            $email = $validated['email'];
+            $domain = str_contains($email, '@') ? explode('@', $email, 2)[1] : null;
+            if (! $domain || ! checkdnsrr($domain, 'MX')) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'email' => __('The email address does not appear to be a deliverable address.'),
+                ]);
+            }
         }
 
         $user->save();
@@ -76,6 +95,9 @@ new class extends Component {
 
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+            <!-- Username (display only, disabled so it's not editable and not submitted) -->
+            <flux:input value="{{ auth()->user()->username }}" :label="__('Username')" type="text" disabled />
+
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
