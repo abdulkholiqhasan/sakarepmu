@@ -105,3 +105,41 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// Lightweight JSON endpoint for username availability used by the registration page JS fallback.
+Route::get('/username/check', function (\Illuminate\Http\Request $request) {
+    $username = \Illuminate\Support\Str::lower((string) $request->query('username', ''));
+    if (trim($username) === '') {
+        return response()->json(['status' => '', 'suggestions' => []]);
+    }
+
+    $validator = \Illuminate\Support\Facades\Validator::make(['username' => $username], ['username' => ['required', 'string', 'max:50', 'alpha_dash']]);
+    if ($validator->fails()) {
+        return response()->json(['status' => 'invalid', 'suggestions' => []]);
+    }
+
+    $exists = App\Models\User::where('username', $username)->exists();
+    $status = $exists ? 'taken' : 'available';
+
+    $suggestions = [];
+    if ($exists) {
+        $suffixes = ['hub', 'jpg', '702', 'app', 'xyz'];
+        foreach ($suffixes as $s) {
+            $candidate = preg_match('/^\d+$/', $s) ? $username . $s : ($username . '-' . $s);
+            if (!App\Models\User::where('username', $candidate)->exists()) {
+                $suggestions[] = $candidate;
+            }
+            if (count($suggestions) >= 3) break;
+        }
+        $i = 1;
+        while (count($suggestions) < 3 && $i <= 50) {
+            $candidate = $username . $i;
+            if (!App\Models\User::where('username', $candidate)->exists()) {
+                $suggestions[] = $candidate;
+            }
+            $i++;
+        }
+    }
+
+    return response()->json(['status' => $status, 'suggestions' => $suggestions]);
+});

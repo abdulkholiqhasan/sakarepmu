@@ -40,6 +40,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
     ];
@@ -113,5 +114,13 @@ class User extends Authenticatable
         }
 
         return $this->roles->contains('name', $role) || $this->roles->contains('id', $role);
+    }
+
+    /**
+     * Always store username as lowercase to keep uniqueness case-insensitive.
+     */
+    public function setUsernameAttribute(?string $value): void
+    {
+        $this->attributes['username'] = $value === null ? null : Str::lower($value);
     }
 }
