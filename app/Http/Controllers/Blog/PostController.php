@@ -24,7 +24,8 @@ class PostController extends Controller
 
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
+        // Do not load all categories for the create form — use AJAX search instead.
+        $categories = collect();
         return view('blog.posts.create', compact('categories'));
     }
 
@@ -92,8 +93,8 @@ class PostController extends Controller
             $post->tags()->sync($existing);
         }
 
-        // create new tags if provided via new_tags input and attach them
-        if ($request->filled('new_tags')) {
+        // create new tags only when the post is published (new tags remain draft otherwise)
+        if (!empty($data['published']) && $request->filled('new_tags')) {
             $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
             foreach ($newNames as $name) {
                 if (!$name) continue;
@@ -112,7 +113,8 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
-        $categories = Category::orderBy('name')->get();
+        // Only provide the post's currently selected categories to avoid loading large sets.
+        $categories = $post->categories()->orderBy('name')->get();
         return view('blog.posts.edit', compact('post', 'categories'));
     }
 
@@ -192,7 +194,7 @@ class PostController extends Controller
             $post->tags()->sync([]);
         }
 
-        if ($request->filled('new_tags')) {
+        if (!empty($data['published']) && $request->filled('new_tags')) {
             $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
             foreach ($newNames as $name) {
                 if (!$name) continue;

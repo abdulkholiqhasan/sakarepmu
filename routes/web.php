@@ -48,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Blog categories for posts (CRUD)
     Route::prefix('manage/posts/categories')->name('categories.')->group(function () {
+        // AJAX search endpoint for categories (used by post forms)
+        Route::get('search', [App\Http\Controllers\Blog\CategoryController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\CategoryController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\CategoryController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\CategoryController::class, 'store'])->name('store');
@@ -58,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Blog tags for posts (CRUD)
     Route::prefix('manage/posts/tags')->name('tags.')->group(function () {
+        // AJAX search endpoint for tags (used by post forms)
+        Route::get('search', [App\Http\Controllers\Blog\TagController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\TagController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\TagController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\TagController::class, 'store'])->name('store');

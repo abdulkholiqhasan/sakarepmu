@@ -66,30 +66,23 @@
                         <div class="bg-white dark:bg-zinc-800 p-4 rounded border dark:border-zinc-700">
                             <h3 class="font-medium text-sm text-gray-700 dark:text-zinc-200 mb-2">Categories</h3>
                             <div class="mt-2">
-                                    <!-- Hidden native select to keep form compatibility -->
+                                    <!-- Hidden native select to keep form compatibility. Prepopulate with current selections. -->
                                     <select id="categories-select" name="categories[]" multiple class="hidden">
                                         @php
                                             $selected = old('categories', $post->categories->pluck('id')->toArray());
                                         @endphp
-                                        @foreach($categories as $option)
-                                            <option value="{{ $option->id }}" {{ in_array($option->id, $selected) ? 'selected' : '' }}>{{ $option->name }}</option>
+                                        @foreach($selected as $selId)
+                                            @php $cat = \\App\\Models\\Blog\\Category::find($selId); @endphp
+                                            @if($cat)
+                                                <option value="{{ $cat->id }}" selected>{{ $cat->name }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
 
-                                    <!-- Custom dropdown trigger -->
+                                    <!-- Search input for categories (AJAX typeahead) -->
                                     <div class="relative">
-                                        <button type="button" id="categories-toggle" class="w-full text-left px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-zinc-900 dark:border-zinc-700">
-                                            Select categories
-                                            <span class="float-right">▾</span>
-                                        </button>
-
-                                        <div id="categories-dropdown" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded shadow max-h-48 overflow-auto hidden z-50">
-                                            <ul class="divide-y divide-gray-100 dark:divide-zinc-800">
-                                                @foreach($categories as $option)
-                                                    <li class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-zinc-800 cursor-pointer" data-id="{{ $option->id }}">{{ $option->name }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
+                                        <input type="text" id="category-search" placeholder="Search categories..." class="w-full px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-zinc-900 dark:border-zinc-700" autocomplete="off" />
+                                        <div id="category-suggestions" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded shadow max-h-48 overflow-auto hidden z-50"></div>
                                     </div>
 
                                     <!-- Selected chips -->
@@ -98,13 +91,9 @@
                                     <script>
                                         (function(){
                                             const select = document.getElementById('categories-select');
-                                            const toggle = document.getElementById('categories-toggle');
-                                            const dropdown = document.getElementById('categories-dropdown');
                                             const container = document.getElementById('selected-categories');
-
-                                            function getOptionElement(id){
-                                                return dropdown.querySelector('[data-id="'+id+'"]');
-                                            }
+                                            const search = document.getElementById('category-search');
+                                            const suggestions = document.getElementById('category-suggestions');
 
                                             function renderSelected(){
                                                 container.innerHTML = '';
@@ -131,31 +120,50 @@
                                                 });
                                             }
 
-                                            function toggleDropdown(){
-                                                dropdown.classList.toggle('hidden');
+                                            async function fetchCategories(q){
+                                                const url = new URL('{{ route('categories.search') }}', window.location.origin);
+                                                if(q) url.searchParams.set('q', q);
+                                                const res = await fetch(url.toString());
+                                                if(!res.ok) return [];
+                                                return res.json();
                                             }
 
-                                            // click option in dropdown toggles selection
-                                            dropdown.addEventListener('click', function(e){
-                                                const li = e.target.closest('li[data-id]');
-                                                if(!li) return;
-                                                const id = li.getAttribute('data-id');
-                                                const opt = Array.from(select.options).find(o => o.value === id);
-                                                if(opt) opt.selected = !opt.selected;
-                                                renderSelected();
-                                                // close dropdown after selection so user can reopen to add more
-                                                dropdown.classList.add('hidden');
+                                            function showSuggestions(items){
+                                                suggestions.innerHTML = '';
+                                                if(!items.length){ suggestions.classList.add('hidden'); return; }
+                                                suggestions.classList.remove('hidden');
+                                                items.forEach(it=>{
+                                                    const el = document.createElement('div');
+                                                    el.className = 'px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer flex justify-between items-center';
+                                                    el.textContent = it.name;
+                                                    el.dataset.id = it.id;
+                                                    el.addEventListener('click', ()=>{
+                                                        // ensure option exists in native select
+                                                        let opt = Array.from(select.options).find(o=>o.value===String(it.id));
+                                                        if(!opt){ opt = document.createElement('option'); opt.value = it.id; opt.text = it.name; opt.selected = true; select.appendChild(opt); }
+                                                        opt.selected = true;
+                                                        renderSelected();
+                                                        suggestions.classList.add('hidden');
+                                                        search.value = '';
+                                                    });
+                                                    suggestions.appendChild(el);
+                                                });
+                                            }
+
+                                            let debounceTimer = null;
+                                            search.addEventListener('input', function(e){
+                                                const q = e.target.value.trim();
+                                                clearTimeout(debounceTimer);
+                                                debounceTimer = setTimeout(async ()=>{
+                                                    const items = await fetchCategories(q);
+                                                    showSuggestions(items || []);
+                                                }, 200);
                                             });
 
-                                            toggle.addEventListener('click', function(e){
-                                                e.stopPropagation();
-                                                toggleDropdown();
-                                            });
-
-                                            // close on outside click
+                                            // close suggestions on outside click
                                             document.addEventListener('click', function(e){
-                                                if(!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && e.target !== toggle){
-                                                    dropdown.classList.add('hidden');
+                                                if(!suggestions.classList.contains('hidden') && !suggestions.contains(e.target) && e.target !== search){
+                                                    suggestions.classList.add('hidden');
                                                 }
                                             });
 
@@ -170,11 +178,29 @@
                         <div class="bg-white dark:bg-zinc-800 p-4 rounded border dark:border-zinc-700">
                             <h3 class="font-medium text-sm text-gray-700 dark:text-zinc-200 mb-2">Tags</h3>
                             <div class="mt-1">
-                                <div id="tag-input" class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 flex flex-wrap items-center"></div>
-                                <input type="hidden" name="tags[]" id="tags-hidden" />
-                                <input type="text" id="tag-typeahead" placeholder="Add a tag and press Enter" class="mt-2 w-full px-3 py-2 rounded-md border border-transparent focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm bg-white dark:bg-gray-800 dark:text-gray-100" />
-                                <div id="tag-suggestions" class="relative"></div>
-                                <p class="text-xs text-gray-500 mt-1">Type to add tags. Press Enter to add. Suggestions appear as you type.</p>
+                                <!-- Hidden select prepopulate with current tags -->
+                                <select id="tags-select" name="tags[]" multiple class="hidden">
+                                    @php
+                                        $initialTags = old('tags', $post->tags->pluck('id')->toArray());
+                                    @endphp
+                                    @foreach($initialTags as $tid)
+                                        @php $t = \App\Models\Blog\Tag::find($tid); @endphp
+                                        @if($t)
+                                            <option value="{{ $t->id }}" selected>{{ $t->name }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+
+                                <div class="relative">
+                                    <input type="text" id="tag-search" placeholder="Search or add tags..." class="w-full px-3 py-2 rounded-md border border-gray-200 bg-white dark:bg-zinc-900 dark:border-zinc-700" autocomplete="off" />
+                                    <div id="tag-suggestions" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded shadow max-h-48 overflow-auto hidden z-50"></div>
+                                    <div class="mt-2">
+                                        <flux:button type="button" id="tag-add-btn" class="relative z-10 w-full" variant="primary">Add</flux:button>
+                                    </div>
+                                </div>
+
+                                <div id="selected-tags" class="mt-2 flex flex-wrap gap-2"></div>
+                                <p class="text-xs text-gray-500 mt-1">Type to search tags. Press Enter to add new tag.</p>
                             </div>
                         </div>
 
@@ -211,84 +237,117 @@
 <script>
     // Lightweight tag input + category search for Edit Post
     (function(){
-        const allTags = @json(App\Models\Blog\Tag::orderBy('name')->get()->map(fn($t)=>['id'=>$t->id,'name'=>$t->name]));
-        const initialTags = @json($post->tags->map(fn($t)=>['id'=>$t->id,'name'=>$t->name]));
-        const tagInput = document.getElementById('tag-input');
-        const tagType = document.getElementById('tag-typeahead');
-        const tagHidden = document.getElementById('tags-hidden');
-        const suggestionsBox = document.getElementById('tag-suggestions');
-        let selectedTags = initialTags.slice();
+        const select = document.getElementById('tags-select');
+        const container = document.getElementById('selected-tags');
+        const search = document.getElementById('tag-search');
+        const suggestions = document.getElementById('tag-suggestions');
 
-        function renderTags(){
-            tagInput.innerHTML = '';
-            selectedTags.forEach(t=>{
-                const el = document.createElement('span');
-                el.className = 'm-1 inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-zinc-700 text-gray-800 dark:text-gray-100';
-                el.textContent = t.name;
+        function renderSelected(){
+            container.innerHTML = '';
+            const selected = Array.from(select.selectedOptions).map(opt => ({id: opt.value, name: opt.text}));
+            selected.forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-zinc-700 text-gray-800 dark:text-gray-100';
+                span.textContent = item.name;
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'ml-2 text-xs opacity-70';
+                btn.className = 'ml-2 text-xs text-gray-600 dark:text-gray-300';
                 btn.textContent = '×';
-                btn.onclick = ()=>{ selectedTags = selectedTags.filter(x=>x.id!==t.id); renderTags(); };
-                el.appendChild(btn);
-                tagInput.appendChild(el);
+                btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const opt = Array.from(select.options).find(o => o.value === item.id);
+                    if(opt) opt.selected = false;
+                    renderSelected();
+                });
+                span.appendChild(btn);
+                container.appendChild(span);
             });
-            tagHidden.value = selectedTags.map(t=>t.id).join(',');
         }
 
-        function showSuggestions(query){
-            const q = query.trim().toLowerCase();
-            if(!q){ suggestionsBox.innerHTML = ''; return; }
-            const matches = allTags.filter(t=>t.name.toLowerCase().includes(q) && !selectedTags.find(s=>s.id===t.id)).slice(0,8);
-            suggestionsBox.innerHTML = '';
-            const list = document.createElement('div');
-            list.className = 'absolute mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded shadow z-50 w-full';
-            matches.forEach(m=>{
-                const item = document.createElement('div');
-                item.className = 'px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer';
-                item.textContent = m.name;
-                item.onclick = ()=>{ selectedTags.push(m); renderTags(); tagType.value=''; suggestionsBox.innerHTML=''; };
-                list.appendChild(item);
-            });
-            suggestionsBox.appendChild(list);
+        async function fetchTags(q){
+            const url = new URL('{{ route('tags.search') }}', window.location.origin);
+            if(q) url.searchParams.set('q', q);
+            const res = await fetch(url.toString());
+            if(!res.ok) return [];
+            return res.json();
         }
 
-        tagType.addEventListener('keydown', (e)=>{
-            if(e.key==='Enter'){
+        function showSuggestions(items){
+            suggestions.innerHTML = '';
+            if(!items.length){ suggestions.classList.add('hidden'); return; }
+            suggestions.classList.remove('hidden');
+            items.forEach(it=>{
+                const el = document.createElement('div');
+                el.className = 'px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer flex justify-between items-center';
+                el.textContent = it.name;
+                el.dataset.id = it.id;
+                el.addEventListener('click', ()=>{
+                    let opt = Array.from(select.options).find(o=>o.value===String(it.id));
+                    if(!opt){ opt = document.createElement('option'); opt.value = it.id; opt.text = it.name; opt.selected = true; select.appendChild(opt); }
+                    opt.selected = true;
+                    renderSelected();
+                    suggestions.classList.add('hidden');
+                    search.value = '';
+                });
+                suggestions.appendChild(el);
+            });
+        }
+
+        // reusable add-from-input function
+        function addTagFromInput(){
+            const name = search.value.trim();
+            if(!name) return;
+            const newId = 'new:'+name;
+            let opt = Array.from(select.options).find(o=>o.value===newId);
+            if(!opt){ opt = document.createElement('option'); opt.value = newId; opt.text = name; opt.selected = true; select.appendChild(opt); }
+            opt.selected = true;
+            renderSelected();
+            search.value = '';
+            suggestions.classList.add('hidden');
+        }
+
+        // allow enter to create new tag locally as placeholder (new:NAME)
+        search.addEventListener('keydown', (e)=>{
+            if(e.key === 'Enter'){
                 e.preventDefault();
-                const name = tagType.value.trim();
-                if(!name) return;
-                let found = allTags.find(t=>t.name.toLowerCase()===name.toLowerCase());
-                if(!found){ found = { id: 'new:'+name, name }; }
-                if(!selectedTags.find(t=>t.name.toLowerCase()===found.name.toLowerCase())){ selectedTags.push(found); renderTags(); }
-                tagType.value=''; suggestionsBox.innerHTML='';
+                addTagFromInput();
             }
         });
 
-        tagType.addEventListener('input', (e)=>{ showSuggestions(e.target.value); });
+        // bind add button
+        const addBtn = document.getElementById('tag-add-btn');
+        if(addBtn){ addBtn.addEventListener('click', (e)=>{ e.preventDefault(); addTagFromInput(); }); }
 
-        // Category search
-        const catSearch = document.getElementById('category-search');
-        const catList = document.getElementById('categories-list');
-        catSearch.addEventListener('input', (e)=>{
-            const q = e.target.value.trim().toLowerCase();
-            Array.from(catList.querySelectorAll('label')).forEach(lbl=>{
-                const txt = lbl.textContent.trim().toLowerCase();
-                lbl.style.display = txt.includes(q) ? 'flex' : 'none';
-            });
+        let debounceTimer = null;
+        search.addEventListener('input', function(e){
+            const q = e.target.value.trim();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async ()=>{
+                if(!q){ suggestions.innerHTML=''; suggestions.classList.add('hidden'); return; }
+                const items = await fetchTags(q);
+                const selectedIds = Array.from(select.selectedOptions).map(o=>String(o.value));
+                const filtered = (items || []).filter(i=>!selectedIds.includes(String(i.id)));
+                showSuggestions(filtered || []);
+            }, 200);
         });
 
-        // Before submit: ensure tags hidden input contains IDs; convert 'new:' prefixed ids to names for server to parse
+        // Before submit: populate tags and new_tags hidden fields
         const form = document.querySelector('form');
         if(form){
             form.addEventListener('submit', ()=>{
-                const newTags = selectedTags.filter(t=>String(t.id).startsWith('new:')).map(t=>t.name);
-                if(newTags.length){ let el = document.getElementById('new-tags-hidden'); if(!el){ el = document.createElement('input'); el.type='hidden'; el.name='new_tags'; el.id='new-tags-hidden'; form.appendChild(el); } el.value = newTags.join(','); }
-                tagHidden.value = selectedTags.map(t=>t.id).join(',');
+                const vals = Array.from(select.selectedOptions).map(o=>o.value);
+                let elTags = document.getElementById('tags-hidden');
+                if(!elTags){ elTags = document.createElement('input'); elTags.type='hidden'; elTags.name='tags'; elTags.id='tags-hidden'; form.appendChild(elTags); }
+                elTags.value = vals.join(',');
+
+                const newNames = vals.filter(v=>String(v).startsWith('new:')).map(v=>String(v).replace(/^new:/,''));
+                if(newNames.length){ let elNew = document.getElementById('new-tags-hidden'); if(!elNew){ elNew = document.createElement('input'); elNew.type='hidden'; elNew.name='new_tags'; elNew.id='new-tags-hidden'; form.appendChild(elNew); } elNew.value = newNames.join(','); }
             });
         }
 
-        renderTags();
+        // initialize display
+        document.addEventListener('DOMContentLoaded', renderSelected);
+        renderSelected();
     })();
 </script>
 

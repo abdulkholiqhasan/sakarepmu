@@ -62,4 +62,19 @@ class CategoryController extends Controller
 
         return redirect()->route('categories.index')->with('success', 'Category deleted.');
     }
+
+    /**
+     * JSON search endpoint used by AJAX typeahead when categories list is large.
+     * Returns array of {id, name} matching the optional 'q' query parameter.
+     */
+    public function search(Request $request)
+    {
+        $q = $request->query('q');
+
+        $results = Category::when($q, function ($query, $q) {
+            $query->where('name', 'like', "%{$q}%");
+        })->orderBy('name')->limit(50)->get(['id', 'name']);
+
+        return response()->json($results);
+    }
 }
