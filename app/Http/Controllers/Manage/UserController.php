@@ -38,11 +38,25 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        // Normalize username to lowercase before validation
+        $request->merge(['username' => strtolower((string) $request->input('username', ''))]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique(User::class)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'string', 'min:8'],
         ]);
+
+        // Extra: ensure the email domain appears to accept mail (has MX record).
+        // Skip this check in the testing environment to avoid CI/network dependency.
+        if (! app()->environment('testing')) {
+            $email = $validated['email'] ?? '';
+            $domain = str_contains($email, '@') ? explode('@', $email, 2)[1] : null;
+            if (! $domain || ! checkdnsrr($domain, 'MX')) {
+                return back()->withErrors(['email' => 'The email address does not appear to be a deliverable address.'])->withInput();
+            }
+        }
 
         $validated['password'] = Hash::make($validated['password']);
 
@@ -71,6 +85,20 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
+
+        // If email changed (case-insensitive), ensure the domain accepts mail (MX)
+        if (isset($validated['email']) && strtolower($validated['email']) !== strtolower($user->email ?? '')) {
+            if (! app()->environment('testing')) {
+                $email = $validated['email'];
+                $domain = str_contains($email, '@') ? explode('@', $email, 2)[1] : null;
+                if (! $domain || ! checkdnsrr($domain, 'MX')) {
+                    return back()->withErrors(['email' => 'The email address does not appear to be a deliverable address.'])->withInput();
+                }
+            }
+
+            // mark as unverified when changed
+            $validated['email_verified_at'] = null;
+        }
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
