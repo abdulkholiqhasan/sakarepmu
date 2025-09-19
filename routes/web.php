@@ -143,3 +143,29 @@ Route::get('/username/check', function (\Illuminate\Http\Request $request) {
 
     return response()->json(['status' => $status, 'suggestions' => $suggestions]);
 });
+
+// Lightweight JSON endpoint for email availability/validity used by registration page JS.
+Route::get('/email/check', function (\Illuminate\Http\Request $request) {
+    $email = (string) $request->query('email', '');
+    if (trim($email) === '') {
+        return response()->json(['status' => '', 'suggestions' => []]);
+    }
+
+    // Basic format validation
+    if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return response()->json(['status' => 'invalid', 'suggestions' => []]);
+    }
+
+    // Skip DNS checks in testing
+    if (! app()->environment('testing')) {
+        $domain = explode('@', $email, 2)[1] ?? null;
+        if (! $domain || ! checkdnsrr($domain, 'MX')) {
+            return response()->json(['status' => 'invalid', 'suggestions' => []]);
+        }
+    }
+
+    $exists = App\Models\User::where('email', $email)->exists();
+    $status = $exists ? 'taken' : 'available';
+
+    return response()->json(['status' => $status, 'suggestions' => []]);
+});

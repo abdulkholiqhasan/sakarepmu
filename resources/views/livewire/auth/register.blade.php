@@ -18,6 +18,8 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public array $usernameSuggestions = [];
     // checking | available | taken | invalid | ''
     public string $usernameStatus = '';
+    // email status: '' | 'invalid'
+    public string $emailStatus = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -41,6 +43,19 @@ new #[Layout('components.layouts.auth')] class extends Component {
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        // Extra: ensure the email domain appears to accept mail (has MX record).
+        // Skip this check in the testing environment to avoid CI/network dependency.
+        if (! app()->environment('testing')) {
+            $email = $validated['email'] ?? '';
+            $domain = str_contains($email, '@') ? explode('@', $email, 2)[1] : null;
+            if (! $domain || ! checkdnsrr($domain, 'MX')) {
+                // Return a validation error for the email field
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'email' => __('The email address does not appear to be a deliverable address.'),
+                ]);
+            }
+        }
 
         event(new Registered(($user = User::create($validated))));
 
@@ -116,6 +131,42 @@ new #[Layout('components.layouts.auth')] class extends Component {
         // availability block (which carries a data attribute). Client-side Alpine watches
         // that attribute via MutationObserver to pick up the new status. This avoids
         // depending on emit/dispatchBrowserEvent methods that aren't available here.
+    }
+
+    /**
+     * Realtime email deliverability check (non-networking in testing).
+     */
+    public function checkEmail(): void
+    {
+        $this->email = trim($this->email ?? '');
+        if ($this->email === '') {
+            $this->emailStatus = '';
+            return;
+        }
+
+        // Basic format check
+        $validator = \Illuminate\Support\Facades\Validator::make([
+            'email' => $this->email,
+        ], [
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            $this->emailStatus = 'invalid';
+            return;
+        }
+
+        // If not in testing environment, perform domain MX check.
+        if (! app()->environment('testing')) {
+            $domain = str_contains($this->email, '@') ? explode('@', $this->email, 2)[1] : null;
+            if (! $domain || ! checkdnsrr($domain, 'MX')) {
+                $this->emailStatus = 'invalid';
+                return;
+            }
+        }
+
+        // Valid/deliverable (we do not expose 'available'/'taken' for email here)
+        $this->emailStatus = '';
     }
 
     public function mount(): void
@@ -201,7 +252,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
         />
 
         <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
+            <flux:button
+                type="submit"
+                variant="primary"
+                class="w-full"
+                data-test="register-user-button"
+                <?php echo ($usernameStatus !== 'available' || $emailStatus === 'invalid') ? 'disabled="disabled"' : ''; ?>
+            >
                 {{ __('Create account') }}
             </flux:button>
         </div>

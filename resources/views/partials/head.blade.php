@@ -44,7 +44,6 @@
 			function ensureGlobal() {
 				if (global) return global;
 				global = document.createElement('div');
-				global.id = 'lw-global-availability';
 				global.style.position = 'fixed';
 				global.style.right = '1rem';
 				global.style.top = '4rem';
@@ -64,7 +63,11 @@
 				const g = ensureGlobal();
 				lastTarget = target || lastTarget;
 				if (!val || val.trim() === '') { g.style.display = 'none'; return; }
-				fetch('/username/check?username=' + encodeURIComponent(val), { credentials: 'same-origin' })
+
+				// Always treat this as a username check (we no longer do realtime email checks)
+				const url = '/username/check?username=' + encodeURIComponent(val);
+
+				fetch(url, { credentials: 'same-origin' })
 					.then(r => r.json())
 					.then(json => {
 						// Position popover under the target input when present
@@ -124,14 +127,18 @@
 							return null;
 						}
 
-								const inlineContainer = findInlineContainer(lastTarget);
-								const wroteInline = Boolean(inlineContainer);
-								// clear inline when empty to avoid stale text appearing briefly
-								if (!val || val.trim() === '') {
-									try { if (inlineContainer) inlineContainer.innerHTML = ''; } catch (e) {}
-								}
-								if (inlineContainer) {
-							try {
+						const inlineContainer = findInlineContainer(lastTarget);
+						const wroteInline = Boolean(inlineContainer);
+
+						// clear inline when empty to avoid stale text appearing briefly
+						if (!val || val.trim() === '') {
+							try { if (inlineContainer) inlineContainer.innerHTML = ''; } catch (e) {}
+							try { g.style.display = 'none'; } catch (e) {}
+							return;
+						}
+
+						try {
+							if (inlineContainer) {
 								if (json.status === 'available') {
 									inlineContainer.innerHTML = `<span class="text-sm text-green-600">Username "${val}" is available.</span>`;
 								} else if (json.status === 'taken') {
@@ -153,13 +160,14 @@
 								} else if (json.status === 'invalid') {
 									inlineContainer.innerHTML = `<div class="text-sm text-red-600">Invalid username. Use letters, numbers, dashes and underscores only.</div>`;
 								}
-							} catch (e) {
-								console.error('write inline error', e);
 							}
+						} catch (e) {
+							console.error('write inline error', e);
 						}
 
 						// If we didn't write inline, fall back to the floating popover
 						if (!wroteInline) {
+							// Only render username messages in the popover
 							if (json.status === 'available') {
 								g.innerHTML = `<div style="color:#16a34a">Username "${val}" is available.</div>`;
 								g.style.display = '';
@@ -188,13 +196,19 @@
 					}).catch(err => { console.error('username check error', err); });
 			}
 
+            
+
+			// Delegated input listener: trigger availability checks for username inputs
 			document.addEventListener('input', function(ev){
 				const t = ev.target;
 				if (!t || t.tagName !== 'INPUT') return;
 				const placeholder = (t.getAttribute('placeholder') || '').toLowerCase();
 				const aria = (t.getAttribute('aria-label') || '').toLowerCase();
 				const name = (t.getAttribute('name') || '').toLowerCase();
-				if (placeholder.includes('username') || aria.includes('username') || name.includes('username') || t.closest('[data-flux-input]')) {
+				const type = (t.getAttribute('type') || '').toLowerCase();
+				const looksLikeUsername = placeholder.includes('username') || aria.includes('username') || name.includes('username') || /user(name)?/.test(t.id || '');
+				// Only trigger for explicit username inputs, or when inside the username wrapper
+				if (looksLikeUsername || t.closest('#username-wrapper')) {
 					if (timeout) clearTimeout(timeout);
 					timeout = setTimeout(() => doCheck(t.value, t), 250);
 				}
