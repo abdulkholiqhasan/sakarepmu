@@ -1,57 +1,138 @@
-<x-layouts.app :title="__('Create Role')">
-    <div class="p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div>
-                <h1 class="text-2xl font-semibold">Create Role</h1>
-                <p class="text-sm text-zinc-600 dark:text-zinc-300">Define a new role and assign permissions.</p>
+<?php $title = 'Create Role'; ?>
+<x-layouts.app :title="$title ?? null">
+    <div class="bg-white dark:bg-zinc-900 min-h-screen">
+        <!-- Admin-style header -->
+        <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 px-4 sm:px-6 py-3 sm:py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <h1 class="text-xl sm:text-2xl font-normal text-gray-900 dark:text-white">Create Role</h1>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <flux:button :href="route('roles.index')" variant="ghost" class="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                        <span class="hidden sm:inline">← Back to Roles</span>
+                        <span class="sm:hidden">← Back</span>
+                    </flux:button>
+                </div>
             </div>
-            <a href="{{ route('roles.index') }}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800">Back to list</a>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 shadow-sm rounded p-6 border border-zinc-200 dark:border-zinc-700">
-            @if ($errors->any())
-                <div class="mb-4 p-3 bg-red-50 border border-red-100 text-red-700 rounded">
-                    <strong class="block">There were some problems with your input:</strong>
-                    <ul class="mt-2 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('roles.store') }}" class="space-y-6">
-                @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700">Name</label>
-                        <input name="name" value="{{ old('name') }}" class="w-full border rounded px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700" required />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700">Guard Name</label>
-                        <input name="guard_name" value="{{ old('guard_name') }}" class="w-full border rounded px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700" />
+        @if($errors->any())
+            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 p-4 mx-4 sm:mx-6 mt-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800 dark:text-red-200">There were errors with your submission:</h3>
+                        <div class="mt-2">
+                            <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
                 </div>
+            </div>
+        @endif
 
-                <div>
-                    <label class="block text-sm font-medium text-zinc-700">Permissions</label>
-                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        @foreach($permissions as $permission)
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="permissions[]" value="{{ $permission->getKey() }}" class="h-4 w-4 text-indigo-600 border-gray-300 rounded bg-white dark:bg-zinc-900" />
-                                    <span class="text-sm text-zinc-800 dark:text-zinc-200">{{ $permission->name }}</span>
+        <form action="{{ route('roles.store') }}" method="POST" class="flex flex-col lg:flex-row">
+            @csrf
+            <!-- Main content area -->
+            <div class="w-full lg:w-3/4 px-4 sm:px-6 py-6">
+                
+                <!-- Role Name -->
+                <div class="mb-6">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Role Name</label>
+                    <input 
+                        id="name" 
+                        name="name" 
+                        type="text" 
+                        value="{{ old('name') }}" 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500" 
+                        placeholder="Enter role name"
+                        required 
+                    />
+                    @error('name') 
+                        <p class="text-red-600 dark:text-red-400 mt-2 text-sm">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Guard Name -->
+                <div class="mb-6">
+                    <label for="guard_name" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Guard Name</label>
+                    <input 
+                        id="guard_name" 
+                        name="guard_name" 
+                        type="text" 
+                        value="{{ old('guard_name', 'web') }}" 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500" 
+                        placeholder="Enter guard name (e.g., web)"
+                    />
+                    <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2">The guard defines which authentication system this role applies to. Leave as 'web' for most cases.</p>
+                    @error('guard_name') 
+                        <p class="text-red-600 dark:text-red-400 mt-2 text-sm">{{ $message }}</p> 
+                    @enderror
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="w-full lg:w-1/4 bg-gray-50 dark:bg-zinc-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-zinc-700 px-4 py-6 lg:overflow-y-auto">
+                
+                <!-- Save Box -->
+                <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded mb-6">
+                    <div class="bg-gray-50 dark:bg-zinc-800 px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Save Role</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex flex-col gap-3">
+                            <button 
+                                type="submit" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-3 px-4 rounded text-sm transition-colors"
+                            >
+                                Create Role
+                            </button>
+                            <a 
+                                href="{{ route('roles.index') }}" 
+                                class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 font-medium py-3 px-4 rounded text-sm transition-colors text-center"
+                            >
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permissions -->
+                @if($permissions->isNotEmpty())
+                <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded mb-6">
+                    <div class="bg-gray-50 dark:bg-zinc-800 px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Permissions</h3>
+                    </div>
+                    <div class="p-4 max-h-96 overflow-y-auto">
+                        <div class="space-y-3">
+                            @foreach($permissions as $permission)
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        name="permissions[]" 
+                                        value="{{ $permission->getKey() }}" 
+                                        class="h-4 w-4 text-blue-600 border-gray-300 dark:border-zinc-600 rounded focus:ring-blue-500 bg-white dark:bg-zinc-900"
+                                        {{ in_array($permission->getKey(), old('permissions', [])) ? 'checked' : '' }}
+                                    />
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $permission->name }}</span>
+                                        @if($permission->guard_name)
+                                            <span class="text-xs text-gray-500 dark:text-zinc-400 block">{{ $permission->guard_name }}</span>
+                                        @endif
+                                    </div>
                                 </label>
-                        @endforeach
+                            @endforeach
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-3">Choose permissions granted by this role.</p>
+                        @error('permissions') 
+                            <p class="text-red-600 dark:text-red-400 mt-2 text-sm">{{ $message }}</p> 
+                        @enderror
                     </div>
-                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">Choose permissions granted by this role.</p>
                 </div>
-
-                <div class="flex items-center gap-2">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700">Create</button>
-                    <a href="{{ route('roles.index') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-white text-zinc-800 border border-zinc-200 hover:bg-zinc-50">Cancel</a>
-                </div>
-            </form>
-        </div>
+                @endif
+            </div>
+        </form>
     </div>
-
 </x-layouts.app>
