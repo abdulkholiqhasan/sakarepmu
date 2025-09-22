@@ -26,6 +26,19 @@ class Media extends Model
     ];
 
     /**
+     * Get the full URL for the media file
+     */
+    public function getUrlAttribute()
+    {
+        return asset('storage/' . $this->path);
+    }
+
+    /**
+     * Append url to JSON
+     */
+    protected $appends = ['url'];
+
+    /**
      * Owner relationship
      */
     public function user()

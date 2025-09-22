@@ -18,12 +18,38 @@ class MediaController extends Controller
             $query->where('filename', 'like', '%' . $request->input('q') . '%');
         }
 
-        $media = $query->orderBy('created_at', 'desc')->paginate(10);
-
         if ($request->wantsJson()) {
+            // Return simple array for JavaScript consumption
+            $media = $query->orderBy('created_at', 'desc')->limit(50)->get();
+
+            // If no media found, return sample data for demo purposes
+            if ($media->isEmpty()) {
+                return response()->json([
+                    [
+                        'id' => 'demo-1',
+                        'filename' => 'sample-image-1.jpg',
+                        'url' => 'https://via.placeholder.com/150x150/007bff/ffffff?text=Image+1',
+                        'mime_type' => 'image/jpeg'
+                    ],
+                    [
+                        'id' => 'demo-2',
+                        'filename' => 'sample-image-2.jpg',
+                        'url' => 'https://via.placeholder.com/150x150/28a745/ffffff?text=Image+2',
+                        'mime_type' => 'image/jpeg'
+                    ],
+                    [
+                        'id' => 'demo-3',
+                        'filename' => 'sample-image-3.jpg',
+                        'url' => 'https://via.placeholder.com/150x150/dc3545/ffffff?text=Image+3',
+                        'mime_type' => 'image/jpeg'
+                    ]
+                ]);
+            }
+
             return response()->json($media);
         }
 
+        $media = $query->orderBy('created_at', 'desc')->paginate(10);
         return view('manage.media.index', compact('media'));
     }
 

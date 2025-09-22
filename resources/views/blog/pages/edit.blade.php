@@ -1,42 +1,273 @@
 <?php $title = __('Edit Page'); ?>
 <x-layouts.app :title="$title ?? null">
-    <div class="p-6">
-    <div class="mx-auto w-full max-w-6xl bg-white dark:bg-zinc-800 shadow rounded p-8">
-            <h1 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Edit Page</h1>
-
-            @if($errors->any())
-                <div class="mb-4 bg-red-50 dark:bg-red-900/30 border border-red-100 dark:border-red-800 text-red-700 dark:text-red-200 p-3 rounded">
-                    <ul class="list-disc pl-5">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+    <div class="bg-white dark:bg-zinc-900 min-h-screen">
+        <!-- WordPress-style header -->
+        <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 px-4 sm:px-6 py-3 sm:py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <h1 class="text-xl sm:text-2xl font-normal text-gray-900 dark:text-white">Edit Page</h1>
+                    @if($page->title)
+                        <span class="text-sm text-gray-500 dark:text-zinc-400">— {{ $page->title }}</span>
+                    @endif
                 </div>
-            @endif
-
-            <form action="{{ route('pages.update', $page) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="mb-4 flex items-start justify-between">
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Edit page</p>
-                    </div>
-                    <div>
-                        <flux:button :href="route('pages.index')" variant="ghost">Back to pages</flux:button>
-                    </div>
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    @if($page->slug)
+                        <a href="{{ url('/'.$page->slug) }}" target="_blank" class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-zinc-700 rounded hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+                            <span class="hidden sm:inline">View Page</span>
+                            <span class="sm:hidden">View</span>
+                        </a>
+                    @endif
+                    <flux:button :href="route('pages.index')" variant="ghost" class="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                        <span class="hidden sm:inline">← Back to Pages</span>
+                        <span class="sm:hidden">← Back</span>
+                    </flux:button>
                 </div>
-
-                @include('blog.pages._form')
-            </form>
+            </div>
         </div>
+
+        @if($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mx-4 sm:mx-6 mt-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">There were errors with your submission:</h3>
+                        <div class="mt-2">
+                            <ul class="list-disc list-inside text-sm text-red-700">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <form action="{{ route('pages.update', $page) }}" method="POST" class="flex flex-col lg:flex-row">
+            @csrf
+            @method('PUT')
+            <!-- Main content area (WordPress-style 75% width on desktop, full width on mobile) -->
+            <div class="w-full lg:w-3/4 px-4 sm:px-6 py-6">
+                <!-- Title -->
+                <div class="mb-6">
+                    <input 
+                        name="title" 
+                        type="text" 
+                        value="{{ old('title', $page->title ?? '') }}" 
+                        placeholder="Enter title here" 
+                        class="w-full text-2xl sm:text-3xl font-normal px-0 py-3 border-0 border-b border-gray-200 dark:border-zinc-700 bg-transparent dark:bg-transparent focus:border-blue-500 dark:focus:border-blue-400 focus:ring-0 placeholder-gray-400 dark:placeholder-zinc-500 text-gray-900 dark:text-white" 
+                        style="box-shadow: none;"
+                    />
+                    @error('title') 
+                        <p class="text-red-600 dark:text-red-400 mt-2 text-sm">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Permalink -->
+                <div class="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 px-3 py-2 rounded">
+                    <div class="flex flex-col sm:flex-row sm:items-center text-sm gap-1 sm:gap-0">
+                        <span class="text-gray-600 dark:text-zinc-400">Permalink:</span>
+                        <div class="flex items-center flex-1">
+                            <span class="text-gray-600 dark:text-zinc-400 hidden sm:inline">{{ url('/') }}/</span>
+                            <input 
+                                name="slug" 
+                                id="page-slug-input" 
+                                type="text" 
+                                value="{{ old('slug', $page->slug ?? '') }}" 
+                                class="bg-transparent border-0 p-0 text-blue-600 dark:text-blue-400 focus:ring-0 min-w-0 flex-1 text-sm" 
+                                style="box-shadow: none;"
+                            />
+                            <button type="button" id="page-reset-slug" class="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm touch-manipulation px-2 py-1">Edit</button>
+                        </div>
+                    </div>
+                    @error('slug') 
+                        <p class="text-red-600 dark:text-red-400 mt-1 text-sm">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Content Editor -->
+                <div class="mb-6">
+                    <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded">
+                        @include('components.wysiwyg', ['name' => 'content', 'value' => old('content', $page->content ?? '')])
+                        @error('content') 
+                            <p class="text-red-600 dark:text-red-400 mt-2 text-sm">{{ $message }}</p> 
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <!-- WordPress-style sidebar (stacked on mobile, 25% width on desktop) -->
+            <div class="w-full lg:w-1/4 bg-gray-50 dark:bg-zinc-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-zinc-700 px-4 py-6 lg:overflow-y-auto">
+                
+                <!-- Publish Box -->
+                <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded mb-6">
+                    <div class="bg-gray-50 dark:bg-zinc-800 px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Publish</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-3">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600 dark:text-zinc-400">Status:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">
+                                    @if(isset($page->published_at) && $page->published_at)
+                                        Published
+                                    @else
+                                        Draft
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        
+                        @if(isset($page->published_at) && $page->published_at)
+                            <div class="mb-3">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-600 dark:text-zinc-400">Published on:</span>
+                                    <span class="text-gray-900 dark:text-white">{{ $page->published_at->format('M j, Y') }}</span>
+                                </div>
+                            </div>
+                        @endif
+                        
+                        <div class="mb-3">
+                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Publish date</label>
+                            <input 
+                                name="published_at" 
+                                type="datetime-local" 
+                                value="{{ old('published_at', isset($page) && $page->published_at ? $page->published_at->format('Y-m-d\TH:i') : '') }}" 
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
+                            />
+                            @error('published_at') 
+                                <p class="text-red-600 dark:text-red-400 mt-1 text-sm">{{ $message }}</p> 
+                            @enderror
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-200 dark:border-zinc-700">
+                            <div class="flex flex-col gap-2">
+                                <button 
+                                    type="submit" 
+                                    name="action" 
+                                    value="update" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-3 px-4 rounded text-sm transition-colors touch-manipulation"
+                                >
+                                    Update
+                                </button>
+                                @if(isset($page->published_at) && $page->published_at)
+                                    <button 
+                                        type="submit" 
+                                        name="action" 
+                                        value="revert" 
+                                        onclick="return confirm('Are you sure you want to revert this page to draft?')" 
+                                        class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 font-medium py-3 px-4 rounded text-sm transition-colors touch-manipulation"
+                                    >
+                                        Revert to Draft
+                                    </button>
+                                @else
+                                    <button 
+                                        type="submit" 
+                                        name="action" 
+                                        value="publish" 
+                                        class="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white font-medium py-3 px-4 rounded text-sm transition-colors touch-manipulation"
+                                    >
+                                        Publish
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Attributes -->
+                <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded mb-6">
+                    <div class="bg-gray-50 dark:bg-zinc-800 px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Page Attributes</h3>
+                    </div>
+                    <div class="p-4">
+                        <!-- Parent Page -->
+                        <div class="mb-4">
+                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Parent</label>
+                            <select 
+                                name="parent_id" 
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
+                            >
+                                <option value="">— No parent —</option>
+                                <!-- Note: You'll need to populate this with existing pages in your controller -->
+                            </select>
+                        </div>
+                        
+                        <!-- Template -->
+                        <div class="mb-4">
+                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Template</label>
+                            <select 
+                                name="template" 
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
+                            >
+                                <option value="default" {{ old('template', $page->template ?? 'default') == 'default' ? 'selected' : '' }}>Default Template</option>
+                                <option value="full-width" {{ old('template', $page->template ?? '') == 'full-width' ? 'selected' : '' }}>Full Width</option>
+                                <option value="landing-page" {{ old('template', $page->template ?? '') == 'landing-page' ? 'selected' : '' }}>Landing Page</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Order -->
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Order</label>
+                            <input 
+                                name="order" 
+                                type="number" 
+                                value="{{ old('order', $page->order ?? 0) }}" 
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
+                                placeholder="0"
+                            />
+                            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Pages are usually ordered alphabetically, but you can put a number above to change the order of pages with the same parent.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Featured Image -->
+                <div class="bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded mb-6">
+                    <div class="bg-gray-50 dark:bg-zinc-800 px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="font-medium text-sm text-gray-900 dark:text-white">Featured Image</h3>
+                    </div>
+                    <div class="p-4">
+                        <input 
+                            name="featured_image" 
+                            type="text" 
+                            value="{{ old('featured_image', $page->featured_image ?? '') }}" 
+                            id="featured-image-url" 
+                            placeholder="Image URL" 
+                            class="w-full px-3 py-3 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 mb-3 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500" 
+                        />
+                        
+                        <div class="flex flex-col gap-2 mb-3">
+                            <label class="cursor-pointer text-center py-3 px-3 border border-gray-300 dark:border-zinc-700 rounded text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors touch-manipulation">
+                                <input type="file" name="featured_image_file" id="featured-image-file" class="hidden" accept="image/*" />
+                                Upload Image
+                            </label>
+                            <button 
+                                type="button" 
+                                id="open-media-library" 
+                                class="py-3 px-3 border border-gray-300 dark:border-zinc-700 rounded text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors touch-manipulation"
+                            >
+                                Media Library
+                            </button>
+                        </div>
+                        
+                        <div id="featured-preview">
+                            @if(old('featured_image', $page->featured_image ?? ''))
+                                <img src="{{ old('featured_image', $page->featured_image ?? '') }}" alt="Featured" class="w-full object-cover rounded border border-gray-300 dark:border-zinc-700" style="max-height: 150px;" />
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
     </div>
 </x-layouts.app>
 
+<!-- WordPress-style JavaScript for Pages -->
 <script>
-    // Auto-generate slug from title but allow manual edit on edit page for Pages
+    // Auto-generate slug from title (WordPress style)
     (function(){
         const title = document.querySelector('input[name="title"]');
-                    const slug = document.getElementById('page-slug-input');
+        const slug = document.getElementById('page-slug-input');
         if(!title || !slug) return;
         let manuallyEdited = false;
 
@@ -56,13 +287,90 @@
             if(manuallyEdited) return;
             slug.value = slugify(title.value);
         });
-                    const resetBtn = document.getElementById('page-reset-slug');
-                    if(resetBtn){
-                        resetBtn.addEventListener('click', ()=>{
-                            slug.value = slugify(title.value || '');
-                            manuallyEdited = false;
-                            slug.focus();
-                        });
+
+        const resetBtn = document.getElementById('page-reset-slug');
+        if(resetBtn){
+            resetBtn.addEventListener('click', ()=>{
+                slug.value = slugify(title.value || '');
+                manuallyEdited = false;
+                slug.focus();
+            });
+        }
+    })();
+</script>
+
+<script>
+    // Featured image functionality (WordPress style)
+    (function(){
+        const fileInput = document.getElementById('featured-image-file');
+        const urlInput = document.getElementById('featured-image-url');
+        const preview = document.getElementById('featured-preview');
+        const openMedia = document.getElementById('open-media-library');
+
+        if(fileInput){
+            fileInput.addEventListener('change', (e)=>{
+                const f = e.target.files && e.target.files[0];
+                if(!f) return;
+                const url = URL.createObjectURL(f);
+                urlInput.value = url;
+                preview.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'w-full object-cover rounded border border-gray-300 dark:border-zinc-700';
+                img.style.maxHeight = '150px';
+                preview.appendChild(img);
+            });
+        }
+
+        if(openMedia){
+            openMedia.addEventListener('click', ()=>{
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4';
+                modal.style.zIndex = '10000';
+                const box = document.createElement('div');
+                box.className = 'w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-h-[90vh] overflow-auto';
+                box.innerHTML = `
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-zinc-700">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Media Library</h3>
+                        <button id="close-media" class="text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 text-2xl touch-manipulation px-2 py-1">&times;</button>
+                    </div>
+                    <div id="media-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 p-4"></div>
+                `;
+                modal.appendChild(box);
+                document.body.appendChild(modal);
+
+                document.getElementById('close-media').addEventListener('click', ()=>{ modal.remove(); });
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.remove();
+                });
+
+                // Fetch media
+                fetch('/manage/media', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
+                }).then(r=>r.ok ? r.json() : Promise.reject()).then(json=>{
+                    const list = document.getElementById('media-list');
+                    list.innerHTML='';
+                    json.forEach(m=>{
+                        const it = document.createElement('div');
+                        it.className = 'cursor-pointer border-2 border-transparent hover:border-blue-500 rounded overflow-hidden touch-manipulation';
+                        it.innerHTML = `<img src="${m.url}" class="w-full h-20 sm:h-24 object-cover" />`;
+                        it.addEventListener('click', ()=>{
+                            urlInput.value = m.url;
+                            preview.innerHTML = `<img src="${m.url}" class="w-full object-cover rounded border border-gray-300 dark:border-zinc-700" style="max-height: 150px;" />`;
+                            modal.remove();
+                        });
+                        list.appendChild(it);
+                    });
+                }).catch((error)=>{
+                    console.error('Media fetch error:', error);
+                    const list = document.getElementById('media-list');
+                    list.innerHTML = '<div class="col-span-full text-center text-gray-500 py-8">Unable to load media. Please try again.</div>';
+                });
+            });
+        }
     })();
 </script>
