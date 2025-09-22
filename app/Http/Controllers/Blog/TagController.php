@@ -28,9 +28,12 @@ class TagController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:tags,slug'],
         ]);
 
-        $validated['slug'] = Tag::generateUniqueSlug($validated['name']);
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Tag::generateUniqueSlug($validated['name']);
+        }
 
         Tag::create($validated);
 
@@ -52,9 +55,12 @@ class TagController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:tags,slug,' . $tag->id],
         ]);
 
-        $validated['slug'] = Tag::generateUniqueSlug($validated['name'], $tag->id);
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Tag::generateUniqueSlug($validated['name'], $tag->id);
+        }
 
         $tag->update($validated);
 

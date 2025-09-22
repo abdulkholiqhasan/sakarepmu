@@ -1,7 +1,7 @@
 <?php $title = __('Edit Page'); ?>
 <x-layouts.app :title="$title ?? null">
     <div class="bg-white dark:bg-zinc-900 min-h-screen">
-        <!-- WordPress-style header -->
+        <!-- Admin-style header -->
         <div class="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 px-4 sm:px-6 py-3 sm:py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 sm:space-x-4">
@@ -45,7 +45,7 @@
         <form action="{{ route('pages.update', $page) }}" method="POST" class="flex flex-col lg:flex-row">
             @csrf
             @method('PUT')
-            <!-- Main content area (WordPress-style 75% width on desktop, full width on mobile) -->
+            <!-- Main content area (Admin-style 75% width on desktop, full width on mobile) -->
             <div class="w-full lg:w-3/4 px-4 sm:px-6 py-6">
                 <!-- Title -->
                 <div class="mb-6">
@@ -95,7 +95,7 @@
                 </div>
             </div>
 
-            <!-- WordPress-style sidebar (stacked on mobile, 25% width on desktop) -->
+            <!-- Admin-style sidebar (stacked on mobile, 25% width on desktop) -->
             <div class="w-full lg:w-1/4 bg-gray-50 dark:bg-zinc-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-zinc-700 px-4 py-6 lg:overflow-y-auto">
                 
                 <!-- Publish Box -->
@@ -262,9 +262,9 @@
     </div>
 </x-layouts.app>
 
-<!-- WordPress-style JavaScript for Pages -->
+<!-- Admin-style JavaScript for Pages -->
 <script>
-    // Auto-generate slug from title (WordPress style)
+    // Auto-generate slug from title (Admin style)
     (function(){
         const title = document.querySelector('input[name="title"]');
         const slug = document.getElementById('page-slug-input');
@@ -300,7 +300,7 @@
 </script>
 
 <script>
-    // Featured image functionality (WordPress style)
+    // Featured image functionality (Admin style)
     (function(){
         const fileInput = document.getElementById('featured-image-file');
         const urlInput = document.getElementById('featured-image-url');

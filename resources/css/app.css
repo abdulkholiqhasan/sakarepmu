@@ -474,4 +474,45 @@ select:focus[data-flux-control] {
     .btn-danger {
         @apply bg-red-600 text-white hover:bg-red-700 border-transparent;
     }
+
+    /* Mobile pagination enhancements */
+    @media (max-width: 640px) {
+        /* Ensure pagination buttons have adequate touch targets */
+        nav[aria-label*="Pagination"] .relative.inline-flex {
+            min-width: 44px;
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        /* Improve spacing on mobile pagination */
+        nav[aria-label*="Pagination"] .flex.justify-between {
+            gap: 0.75rem;
+        }
+
+        /* Mobile pagination text sizing */
+        nav[aria-label*="Pagination"] .text-xs {
+            font-size: 0.75rem;
+        }
+
+        /* Ensure pagination container doesn't overflow */
+        nav[aria-label*="Pagination"] {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    }
+
+    /* Dark mode pagination improvements */
+    .dark nav[aria-label*="Pagination"] .bg-white {
+        background-color: rgb(39 39 42) !important; /* zinc-800 */
+        border-color: rgb(63 63 70) !important; /* zinc-600 */
+    }
+
+    .dark nav[aria-label*="Pagination"] .text-zinc-700 {
+        color: rgb(212 212 216) !important; /* zinc-300 */
+    }
+
+    .dark nav[aria-label*="Pagination"] .hover\:bg-zinc-50:hover {
+        background-color: rgb(63 63 70) !important; /* zinc-600 */
+    }
 }

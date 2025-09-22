@@ -14,8 +14,15 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $q = $request->query('q');
+        $status = $request->query('status');
+
         $posts = Post::query()
-            ->when($q, fn($qB) => $qB->where('title', 'like', "%{$q}%"))
+            ->when($q, fn($qB) => $qB->where('title', 'like', "%{$q}%")
+                ->orWhere('excerpt', 'like', "%{$q}%")
+                ->orWhere('content', 'like', "%{$q}%"))
+            ->when($status === 'published', fn($qB) => $qB->where('published', true))
+            ->when($status === 'draft', fn($qB) => $qB->where('published', false))
+            ->with(['author', 'category', 'tags'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

@@ -9,9 +9,20 @@ use Illuminate\Support\Str;
 
 class PagesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pages = Page::orderBy('created_at', 'desc')->paginate(10);
+        $q = $request->query('q');
+        $status = $request->query('status');
+
+        $pages = Page::query()
+            ->when($q, fn($qB) => $qB->where('title', 'like', "%{$q}%")
+                ->orWhere('content', 'like', "%{$q}%"))
+            ->when($status === 'published', fn($qB) => $qB->where('published', true))
+            ->when($status === 'draft', fn($qB) => $qB->where('published', false))
+            ->with(['author'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         return view('blog.pages.index', compact('pages'));
     }
 

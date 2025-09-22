@@ -29,9 +29,12 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug'],
         ]);
 
-        $validated['slug'] = Category::generateUniqueSlug($validated['name']);
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Category::generateUniqueSlug($validated['name']);
+        }
 
         Category::create($validated);
 
@@ -47,9 +50,12 @@ class CategoryController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,' . $category->id],
         ]);
 
-        $validated['slug'] = Category::generateUniqueSlug($validated['name'], $category->id);
+        if (empty($validated['slug'])) {
+            $validated['slug'] = Category::generateUniqueSlug($validated['name'], $category->id);
+        }
 
         $category->update($validated);
 

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        // Add WP-like fields to posts table if it exists
+        // Add blog-like fields to posts table if it exists
         if (Schema::hasTable('posts')) {
             Schema::table('posts', function (Blueprint $table) {
                 if (!Schema::hasColumn('posts', 'author_id')) {
