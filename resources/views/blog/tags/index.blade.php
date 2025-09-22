@@ -1,4 +1,4 @@
-<?php $title = __('Tags'); ?>
+<?php $title = __('Manage / Tags'); ?>
 <x-layouts.app :title="$title ?? null">
     <div class="bg-white dark:bg-zinc-900 min-h-screen">
         <!-- Admin-style header -->
