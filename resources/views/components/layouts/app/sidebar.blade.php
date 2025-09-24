@@ -34,6 +34,43 @@
                 return ['href' => '#', 'enabled' => false, 'route' => $name];
             };
 
+            // Helper: check current user has any of provided permissions
+            $currentUser = auth()->user();
+            $userHasAny = function(array $perms) use ($currentUser) {
+                if (! $currentUser) return false;
+                foreach ($perms as $p) {
+                    if (method_exists($currentUser, 'hasPermission') && $currentUser->hasPermission($p)) return true;
+                }
+                return false;
+            };
+
+            // Map route names to required permissions (if any). If a route is not mapped,
+            // it will be shown by default when the route exists. Map only sensitive routes here.
+            $permissionMap = [
+                // Posts
+                'posts.index' => ['create posts','edit posts','publish posts','delete posts'],
+                'posts.create' => ['create posts'],
+                // Categories & Tags
+                'categories.index' => ['create categories','edit categories','delete categories'],
+                'categories.create' => ['create categories'],
+                'tags.index' => ['create tags','edit tags','delete tags'],
+                'tags.create' => ['create tags'],
+                // Pages
+                'pages.index' => ['manage pages'],
+                'pages.create' => ['manage pages'],
+                // Media
+                'media.index' => ['upload files','delete media'],
+                'media.create' => ['upload files'],
+                // Manages
+                'users.index' => ['manage users'],
+                'roles.index' => ['manage roles'],
+                'permissions.index' => ['manage permissions'],
+                // Settings
+                'general.edit' => ['manage settings'],
+                'profile.edit' => [],
+                'password.edit' => [],
+            ];
+
             // Build menu items with enabled flag
             $mainGroups = [
                 ['label' => 'Posts', 'icon' => 'book-open-text', 'items' => [
@@ -71,6 +108,37 @@
                     array_merge(['label' => 'Display', 'icon' => 'paint-brush'], $resolve('appearance.edit')),
                 ]],
             ];
+
+            // Filter groups and items by permissions: remove items the current user can't access.
+            $filterItems = function(array $groups) use ($permissionMap, $userHasAny) {
+                $out = [];
+                foreach ($groups as $group) {
+                    $items = [];
+                    foreach ($group['items'] as $item) {
+                        $route = $item['route'] ?? null;
+                        $perms = $permissionMap[$route] ?? null;
+                        // If permission map exists for this route, require at least one of them
+                        if (is_array($perms) && count($perms) > 0) {
+                            if ($userHasAny($perms)) {
+                                $items[] = array_merge($item, ['enabled' => $item['enabled'] ?? true]);
+                            }
+                        } else {
+                            // No explicit permission mapping -> show if route exists (enabled true)
+                            if ($item['enabled'] ?? false) {
+                                $items[] = array_merge($item, ['enabled' => true]);
+                            }
+                        }
+                    }
+                    if (count($items) > 0) {
+                        $group['items'] = $items;
+                        $out[] = $group;
+                    }
+                }
+                return $out;
+            };
+
+            $mainGroups = $filterItems($mainGroups);
+            $footerGroups = $filterItems($footerGroups);
             @endphp
                     <flux:navlist.item class="sidebar-item {{ $navItemClass }}" icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-label="Dashboard" aria-label="Dashboard">
                         <span class="sidebar-label">Dashboard</span>

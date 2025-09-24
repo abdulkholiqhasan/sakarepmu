@@ -5,6 +5,7 @@ namespace App\Models\Manage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Manage\PermissionRole;
 
 class Permission extends Model
 {
@@ -33,6 +34,8 @@ class Permission extends Model
     // Relationship to roles
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'permission_role', 'permission_id', 'role_id');
+        return $this->belongsToMany(Role::class, 'permission_role', 'permission_id', 'role_id')
+            ->using(PermissionRole::class)
+            ->withTimestamps();
     }
 }

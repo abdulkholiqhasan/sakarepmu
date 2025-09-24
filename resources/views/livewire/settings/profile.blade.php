@@ -125,6 +125,7 @@ new class extends Component {
                                 {{ __('Password') }}
                             </a>
                         </li>
+                        @if(auth()->check() && method_exists(auth()->user(), 'hasPermission') && auth()->user()->hasPermission('manage settings'))
                         <li>
                             <a href="{{ route('general.edit') }}" 
                                class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('general.edit') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600 dark:border-blue-400' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800' }}">
@@ -135,6 +136,7 @@ new class extends Component {
                                 {{ __('General') }}
                             </a>
                         </li>
+                        @endif
                         <li>
                             <a href="{{ route('appearance.edit') }}" 
                                class="flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors {{ request()->routeIs('appearance.edit') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-r-2 border-blue-600 dark:border-blue-400' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800' }}">

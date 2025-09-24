@@ -17,10 +17,13 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
-    Volt::route('settings/general', 'settings.general')->name('general.edit');
+    // Restrict general settings to administrators only
+    Volt::route('settings/general', 'settings.general')
+        ->name('general.edit')
+        ->middleware(['\\App\\Http\\Middleware\\EnsurePermission:manage settings']);
     // User management routes
     // These are standard controllers so the sidebar helper (Route::has('users.index')) can resolve them.
-    Route::prefix('manage/users')->name('users.')->group(function () {
+    Route::prefix('manage/users')->name('users.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:manage users'])->group(function () {
         Route::get('/', [App\Http\Controllers\Manage\UserController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Manage\UserController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Manage\UserController::class, 'store'])->name('store');
@@ -29,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('{user}', [App\Http\Controllers\Manage\UserController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('manage/roles')->name('roles.')->group(function () {
+    Route::prefix('manage/roles')->name('roles.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:manage roles'])->group(function () {
         Route::get('/', [App\Http\Controllers\Manage\RoleController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Manage\RoleController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Manage\RoleController::class, 'store'])->name('store');
@@ -38,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('{role}', [App\Http\Controllers\Manage\RoleController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('manage/permissions')->name('permissions.')->group(function () {
+    Route::prefix('manage/permissions')->name('permissions.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:manage permissions'])->group(function () {
         Route::get('/', [App\Http\Controllers\Manage\PermissionController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Manage\PermissionController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Manage\PermissionController::class, 'store'])->name('store');
@@ -48,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog categories for posts (CRUD)
-    Route::prefix('manage/posts/categories')->name('categories.')->group(function () {
+    Route::prefix('manage/posts/categories')->name('categories.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create categories'])->group(function () {
         // AJAX search endpoint for categories (used by post forms)
         Route::get('search', [App\Http\Controllers\Blog\CategoryController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\CategoryController::class, 'index'])->name('index');
@@ -60,7 +63,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog tags for posts (CRUD)
-    Route::prefix('manage/posts/tags')->name('tags.')->group(function () {
+    Route::prefix('manage/posts/tags')->name('tags.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create tags'])->group(function () {
         // AJAX search endpoint for tags (used by post forms)
         Route::get('search', [App\Http\Controllers\Blog\TagController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\TagController::class, 'index'])->name('index');
@@ -72,7 +75,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog posts (CRUD)
-    Route::prefix('manage/posts/posts')->name('posts.')->group(function () {
+    Route::prefix('manage/posts/posts')->name('posts.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create posts'])->group(function () {
         Route::get('/', [App\Http\Controllers\Blog\PostController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\PostController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\PostController::class, 'store'])->name('store');
@@ -82,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog pages (CRUD)
-    Route::prefix('manage/pages')->name('pages.')->group(function () {
+    Route::prefix('manage/pages')->name('pages.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:manage pages'])->group(function () {
         Route::get('/', [App\Http\Controllers\Blog\PagesController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\PagesController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\PagesController::class, 'store'])->name('store');
@@ -93,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Media library (CRUD)
-    Route::prefix('manage/media')->name('media.')->group(function () {
+    Route::prefix('manage/media')->name('media.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:upload files'])->group(function () {
         Route::get('/', [App\Http\Controllers\MediaController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\MediaController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\MediaController::class, 'store'])->name('store');
