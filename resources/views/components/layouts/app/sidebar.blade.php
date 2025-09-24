@@ -8,207 +8,173 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        {{-- Accessibility: quick skip link for keyboard users --}}
+        <a href="#main-content" class="sr-only focus:not-sr-only px-4 py-2">Skip to content</a>
         <div class="flex min-h-screen">
             <div id="sidebar-wrapper" class="transition-all duration-200 ease-in-out">
-                <flux:sidebar id="sidebar" sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 h-full w-64 transition-all duration-200 ease-in-out">
+                <flux:sidebar id="sidebar" role="navigation" aria-label="Primary sidebar" sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 h-full w-64 transition-all duration-200 ease-in-out">
             <flux:sidebar.toggle class="lg:hidden text-zinc-800 dark:text-white/80" icon="x-mark" />
 
-            <a href="/" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+            <a href="/" aria-label="Home" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                 <x-app-logo />
             </a>
 
-            <flux:navlist variant="outline">
-                    @php
-                        $postsCreate = Route::has('posts.create') ? route('posts.create') : '#';
-                        $postsIndex = Route::has('posts.index') ? route('posts.index') : '#';
-                        $categoriesIndex = Route::has('categories.index') ? route('categories.index') : '#';
-                        $tagsIndex = Route::has('tags.index') ? route('tags.index') : '#';
-                        // Pages routes (guarded - fallback to '#')
-                        $pagesCreate = Route::has('pages.create') ? route('pages.create') : '#';
-                        $pagesIndex = Route::has('pages.index') ? route('pages.index') : '#';
-                        $pagesTemplates = Route::has('pages.templates') ? route('pages.templates') : '#';
-                        // Manages routes (users, roles, permissions)
-                        $usersIndex = Route::has('users.index') ? route('users.index') : '#';
-                        $rolesIndex = Route::has('roles.index') ? route('roles.index') : '#';
-                        $permissionsIndex = Route::has('permissions.index') ? route('permissions.index') : '#';
-                        // Media routes (guarded - fallback to '#')
-                        $mediaUpload = Route::has('media.create') ? route('media.create') : '#';
-                        $mediaIndex = Route::has('media.index') ? route('media.index') : '#';
-                        // Appearance routes (guarded - fallback to '#')
-                        $appearanceThemes = Route::has('appearance.themes') ? route('appearance.themes') : '#';
-                        $appearanceMenus = Route::has('appearance.menus') ? route('appearance.menus') : '#';
-                        $appearanceWidgets = Route::has('appearance.widgets') ? route('appearance.widgets') : '#';
-                    @endphp
-                    <flux:navlist.item class="sidebar-item" icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-label="Dashboard" aria-label="Dashboard">
+            {{-- Hidden heading to label navigation for assistive tech --}}
+            <h2 id="sidebar-navigation" class="sr-only">Main navigation</h2>
+
+        <flux:navlist variant="outline">
+            @php
+            // Shared class for sidebar nav items to match Posts/Pages admin style
+            $navItemClass = 'px-3 py-2 rounded-md text-sm transition-colors hover:bg-gray-100 dark:hover:bg-zinc-800';
+
+            // Helper to resolve route or null and mark enabled/disabled
+            $resolve = function($name) {
+                if (!$name) return ['href' => '#', 'enabled' => false, 'route' => null];
+                if (Route::has($name)) return ['href' => route($name), 'enabled' => true, 'route' => $name];
+                return ['href' => '#', 'enabled' => false, 'route' => $name];
+            };
+
+            // Build menu items with enabled flag
+            $mainGroups = [
+                ['label' => 'Posts', 'icon' => 'book-open-text', 'items' => [
+                    array_merge(['label' => 'Post List', 'icon' => 'bars-3'], $resolve('posts.index')),
+                    array_merge(['label' => 'Add Post', 'icon' => 'plus'], $resolve('posts.create')),
+                    array_merge(['label' => 'Categories', 'icon' => 'folder'], $resolve('categories.index')),
+                    array_merge(['label' => 'Tags', 'icon' => 'tag'], $resolve('tags.index')),
+                ]],
+                ['label' => 'Pages', 'icon' => 'document-text', 'items' => [
+                    array_merge(['label' => 'Page List', 'icon' => 'bars-3'], $resolve('pages.index')),
+                    array_merge(['label' => 'Add Page', 'icon' => 'plus'], $resolve('pages.create')),
+                    array_merge(['label' => 'Templates', 'icon' => 'layout-grid'], $resolve('pages.templates')),
+                ]],
+                ['label' => 'Media', 'icon' => 'photo', 'items' => [
+                    array_merge(['label' => 'Media Library', 'icon' => 'photo'], $resolve('media.index')),
+                    array_merge(['label' => 'Upload Media', 'icon' => 'cloud-arrow-up'], $resolve('media.create')),
+                ]],
+            ];
+
+            $footerGroups = [
+                ['label' => 'Appearance', 'icon' => 'paint-brush', 'items' => [
+                    array_merge(['label' => 'Themes', 'icon' => 'paint-brush'], $resolve('appearance.themes')),
+                    array_merge(['label' => 'Menus', 'icon' => 'bars-3'], $resolve('appearance.menus')),
+                    array_merge(['label' => 'Widgets', 'icon' => 'puzzle-piece'], $resolve('appearance.widgets')),
+                ]],
+                ['label' => 'Manages', 'icon' => 'user-group', 'items' => [
+                    array_merge(['label' => 'Users', 'icon' => 'user'], $resolve('users.index')),
+                    array_merge(['label' => 'Roles', 'icon' => 'users'], $resolve('roles.index')),
+                    array_merge(['label' => 'Permissions', 'icon' => 'key'], $resolve('permissions.index')),
+                ]],
+                ['label' => 'Settings', 'icon' => 'cog', 'items' => [
+                    array_merge(['label' => 'Profile', 'icon' => 'user'], $resolve('profile.edit')),
+                    array_merge(['label' => 'Password', 'icon' => 'key'], $resolve('password.edit')),
+                    array_merge(['label' => 'General', 'icon' => 'globe-alt'], $resolve('general.edit')),
+                    array_merge(['label' => 'Display', 'icon' => 'paint-brush'], $resolve('appearance.edit')),
+                ]],
+            ];
+            @endphp
+                    <flux:navlist.item class="sidebar-item {{ $navItemClass }}" icon="squares-2x2" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate data-label="Dashboard" aria-label="Dashboard">
                         <span class="sidebar-label">Dashboard</span>
-                        <span class="sr-only">Dashboard</span>
                     </flux:navlist.item>
-                    <!-- Posts group (Expanded) -->
-                    <div class="expanded-only">
-                        <flux:sidebar.group heading="Posts" icon="pencil-square" expandable :expanded="false" class="sidebar-item" data-label="Posts" aria-label="Posts">
-                            <flux:navlist.item href="{{ $postsCreate }}" wire:navigate>Add Post</flux:navlist.item>
-                            <flux:navlist.item href="{{ $postsIndex }}" wire:navigate>Post List</flux:navlist.item>
-                            <flux:navlist.item href="{{ $categoriesIndex }}" wire:navigate>Categories</flux:navlist.item>
-                            <flux:navlist.item href="{{ $tagsIndex }}" wire:navigate>Tags</flux:navlist.item>
-                        </flux:sidebar.group>
-                    </div>
 
-                    <!-- Pages group (Expanded) -->
-                    <div class="expanded-only">
-                        <flux:sidebar.group heading="Pages" icon="book-open-text" expandable :expanded="false" class="sidebar-item" data-label="Pages" aria-label="Pages">
-                            <flux:navlist.item href="{{ $pagesCreate }}" wire:navigate>Add Page</flux:navlist.item>
-                            <flux:navlist.item href="{{ $pagesIndex }}" wire:navigate>Page List</flux:navlist.item>
-                        </flux:sidebar.group>
-                    </div>
+                    {{-- Render main groups (expanded + compact) from shared data --}}
+                    @foreach($mainGroups as $group)
+                        <div class="expanded-only">
+                            <flux:sidebar.group heading="{{ $group['label'] }}" icon="{{ $group['icon'] }}" expandable :expanded="false" class="sidebar-item" data-label="{{ $group['label'] }}" aria-label="{{ $group['label'] }}">
+                                @foreach($group['items'] as $item)
+                                    @php
+                                        $isEnabled = isset($item['enabled']) ? $item['enabled'] : (isset($item['href']) && $item['href'] !== '#');
+                                        $itemClass = $navItemClass . ($isEnabled ? '' : ' opacity-50 cursor-not-allowed');
+                                        $ariaAttrs = $isEnabled ? '' : 'aria-disabled="true" tabindex="-1"';
+                                    @endphp
+                                    @if($isEnabled)
+                                        @php $isCurrent = isset($item['route']) && $item['route'] ? request()->routeIs($item['route']) : false; @endphp
+                                        <flux:navlist.item class="{{ $itemClass }}" href="{{ $item['href'] }}" icon="{{ $item['icon'] }}" wire:navigate :current="$isCurrent">{{ $item['label'] }}</flux:navlist.item>
+                                    @else
+                                        {{-- Render non-interactive fallback for unavailable routes --}} 
+                                        <flux:navlist.item class="{{ $itemClass }}" href="#" icon="{{ $item['icon'] }}" aria-disabled="true" tabindex="-1">{{ $item['label'] }}</flux:navlist.item>
+                                    @endif
+                                    @endforeach
+                            </flux:sidebar.group>
+                        </div>
 
-                    <!-- Media group (Expanded) -->
-                    <div class="expanded-only">
-                        <flux:sidebar.group heading="Media" icon="puzzle-piece" expandable :expanded="false" class="sidebar-item" data-label="Media" aria-label="Media">
-                            <flux:navlist.item href="{{ $mediaUpload }}" wire:navigate>Upload Media</flux:navlist.item>
-                            <flux:navlist.item href="{{ $mediaIndex }}" wire:navigate>Media Library</flux:navlist.item>
-                        </flux:sidebar.group>
-                    </div>
+                        <div class="compact-only compact-sidebar-group sidebar-item" data-label="{{ $group['label'] }}">
+                            <flux:dropdown position="right" align="start">
+                                <button slot="trigger" type="button" title="Open {{ strtolower($group['label']) }}" aria-haspopup="true" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open {{ $group['label'] }}" data-compact-target="{{ $group['label'] }}">
+                                    <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                    <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                                </button>
 
-                    <!-- Manages and Settings moved to footer area -->
+                                <flux:menu>
+                                    <flux:menu.radio.group>
+                                        @foreach($group['items'] as $item)
+                                            @php
+                                                $isEnabled = isset($item['enabled']) ? $item['enabled'] : (isset($item['href']) && $item['href'] !== '#');
+                                                $isCurrent = isset($item['route']) && $item['route'] ? request()->routeIs($item['route']) : false;
+                                            @endphp
+                                            @if($isEnabled)
+                                                <flux:menu.item href="{{ $item['href'] }}" wire:navigate icon="{{ $item['icon'] }}">{{ $item['label'] }}</flux:menu.item>
+                                            @else
+                                                <flux:menu.item href="#" icon="{{ $item['icon'] }}" class="opacity-50 cursor-not-allowed" aria-disabled="true" tabindex="-1">{{ $item['label'] }}</flux:menu.item>
+                                            @endif
+                                        @endforeach
+                                    </flux:menu.radio.group>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    @endforeach
 
-                    <!-- Compact-only: Posts dropdown -->
-                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Posts">
-                        <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open posts" data-compact-target="Posts">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
-
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                                    <flux:menu.item href="{{ $postsCreate }}" icon="plus" wire:navigate>Add Post</flux:menu.item>
-                                    <flux:menu.item href="{{ $postsIndex }}" icon="book-open-text" wire:navigate>Post List</flux:menu.item>
-                                    <flux:menu.item href="{{ $categoriesIndex }}" icon="folder" wire:navigate>Categories</flux:menu.item>
-                                    <flux:menu.item href="{{ $tagsIndex }}" icon="tag" wire:navigate>Tags</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-
-                    <!-- Compact-only: Pages dropdown -->
-                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Pages">
-                        <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open pages" data-compact-target="Pages">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
-
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                                    <flux:menu.item href="{{ $pagesCreate }}" icon="plus" wire:navigate>Add Page</flux:menu.item>
-                                    <flux:menu.item href="{{ $pagesIndex }}" icon="book-open-text" wire:navigate>Page List</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-
-                    <!-- Compact-only: Media dropdown -->
-                    <div class="compact-only compact-sidebar-group sidebar-item" data-label="Media">
-                        <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open media" data-compact-target="Media">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
-
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                                    <flux:menu.item href="{{ $mediaUpload }}" icon="plus" wire:navigate>Upload Media</flux:menu.item>
-                                    <flux:menu.item href="{{ $mediaIndex }}" icon="folder" wire:navigate>Media Library</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-
-                    <!-- Compact-only: (Manages and Settings will appear in footer area) -->
             </flux:navlist>
 
             <flux:spacer />
 
             <!-- Footer menus grouped to reduce vertical spacing -->
                 <div class="space-y-1">
-                <div class="expanded-only">
-                    <flux:sidebar.group heading="Appearance" icon="paint-brush" expandable :expanded="false" class="sidebar-item" data-label="Appearance" aria-label="Appearance">
-                        <flux:navlist.item href="{{ $appearanceThemes }}" wire:navigate>Themes</flux:navlist.item>
-                        <flux:navlist.item href="{{ $appearanceMenus }}" wire:navigate>Menus</flux:navlist.item>
-                        <flux:navlist.item href="{{ $appearanceWidgets }}" wire:navigate>Widgets</flux:navlist.item>
-                    </flux:sidebar.group>
-                </div>
-
-                <div class="expanded-only">
-                    <flux:sidebar.group heading="Manages" icon="user-group" expandable :expanded="false" class="sidebar-item" data-label="Manages" aria-label="Manages">
-                        <flux:navlist.item href="{{ $usersIndex }}" wire:navigate>Users</flux:navlist.item>
-                        <flux:navlist.item href="{{ $rolesIndex }}" wire:navigate>Roles</flux:navlist.item>
-                        <flux:navlist.item href="{{ $permissionsIndex }}" wire:navigate>Permissions</flux:navlist.item>
-                    </flux:sidebar.group>
-                </div>
-
-                <div class="expanded-only">
-                    <flux:sidebar.group heading="Settings" icon="cog" expandable :expanded="false" class="sidebar-item" data-label="Settings" aria-label="Settings">
-                        <flux:navlist.item :href="route('profile.edit')" wire:navigate>Profile</flux:navlist.item>
-                        <flux:navlist.item :href="route('password.edit')" wire:navigate>Password</flux:navlist.item>
-                        <flux:navlist.item :href="route('general.edit')" wire:navigate>General</flux:navlist.item>
-                        <flux:navlist.item :href="route('appearance.edit')" wire:navigate>Appearance</flux:navlist.item>
-                    </flux:sidebar.group>
-                </div>
+                @foreach($footerGroups as $group)
+                    <div class="expanded-only">
+                        <flux:sidebar.group heading="{{ $group['label'] }}" icon="{{ $group['icon'] }}" expandable :expanded="false" class="sidebar-item" data-label="{{ $group['label'] }}" aria-label="{{ $group['label'] }}">
+                            @foreach($group['items'] as $item)
+                                @php
+                                    $isEnabled = isset($item['enabled']) ? $item['enabled'] : (isset($item['href']) && $item['href'] !== '#');
+                                    $itemClass = $navItemClass . ($isEnabled ? '' : ' opacity-50 cursor-not-allowed');
+                                    $ariaAttrs = $isEnabled ? '' : 'aria-disabled="true" tabindex="-1"';
+                                @endphp
+                                @if($isEnabled)
+                                    <flux:navlist.item class="{{ $itemClass }}" href="{{ $item['href'] }}" icon="{{ $item['icon'] }}" wire:navigate>{{ $item['label'] }}</flux:navlist.item>
+                                @else
+                                    <flux:navlist.item class="{{ $itemClass }}" href="#" icon="{{ $item['icon'] }}" aria-disabled="true" tabindex="-1">{{ $item['label'] }}</flux:navlist.item>
+                                @endif
+                            @endforeach
+                        </flux:sidebar.group>
+                    </div>
+                @endforeach
 
                 <!-- Compact-only footer grouped -->
                 <div class="compact-only flex flex-col space-y-1">
-                    <div class="compact-sidebar-group sidebar-item" data-label="Appearance">
-                        <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open appearance" data-compact-target="Appearance">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
+                    @foreach($footerGroups as $group)
+                        <div class="compact-sidebar-group sidebar-item" data-label="{{ $group['label'] }}">
+                            <flux:dropdown position="right" align="start">
+                                <button slot="trigger" type="button" title="Open {{ strtolower($group['label']) }}" aria-haspopup="true" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open {{ $group['label'] }}" data-compact-target="{{ $group['label'] }}">
+                                    <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
+                                    <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                                </button>
 
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                                    <flux:menu.item href="{{ $appearanceThemes }}" icon="paint-brush" wire:navigate>Themes</flux:menu.item>
-                                    <flux:menu.item href="{{ $appearanceMenus }}" icon="bars-3" wire:navigate>Menus</flux:menu.item>
-                                    <flux:menu.item href="{{ $appearanceWidgets }}" icon="puzzle-piece" wire:navigate>Widgets</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-                    <div class="compact-sidebar-group sidebar-item" data-label="Manages">
-                        <flux:dropdown position="right" align="start">
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open manages" data-compact-target="Manages">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
-
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                                    <flux:menu.item href="{{ $usersIndex }}" icon="user" wire:navigate>Users</flux:menu.item>
-                                    <flux:menu.item href="{{ $rolesIndex }}" icon="users" wire:navigate>Roles</flux:menu.item>
-                                    <flux:menu.item href="{{ $permissionsIndex }}" icon="key" wire:navigate>Permissions</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-
-                    <div class="compact-sidebar-group sidebar-item" data-label="Settings">
-                        <flux:dropdown position="right" align="start">
-                            <!-- Compact trigger: match other sidebar items sizing and centering -->
-                            <button slot="trigger" type="button" class="compact-trigger inline-flex items-center justify-center p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-white/60 dark:hover:text-white" aria-label="Open settings" data-compact-target="Settings">
-                                <!-- SVG will be copied from the matching expanded group by syncCompactIcon() -->
-                                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24"></svg>
-                            </button>
-
-                            <flux:menu>
-                                <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="user" wire:navigate>Profile</flux:menu.item>
-                        <flux:menu.item :href="route('password.edit')" icon="key" wire:navigate>Password</flux:menu.item>
-                        <flux:menu.item :href="route('general.edit')" icon="globe-alt" wire:navigate>General</flux:menu.item>
-                        <flux:menu.item :href="route('appearance.edit')" icon="paint-brush" wire:navigate>Appearance</flux:menu.item>
-                                </flux:menu.radio.group>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
+                                <flux:menu>
+                                    <flux:menu.radio.group>
+                                        @foreach($group['items'] as $item)
+                                            @php
+                                                $isEnabled = isset($item['enabled']) ? $item['enabled'] : (isset($item['href']) && $item['href'] !== '#');
+                                            @endphp
+                                            @if($isEnabled)
+                                                <flux:menu.item href="{{ $item['href'] }}" wire:navigate icon="{{ $item['icon'] }}">{{ $item['label'] }}</flux:menu.item>
+                                            @else
+                                                <flux:menu.item href="#" icon="{{ $item['icon'] }}" class="opacity-50 cursor-not-allowed" aria-disabled="true" tabindex="-1">{{ $item['label'] }}</flux:menu.item>
+                                            @endif
+                                        @endforeach
+                                    </flux:menu.radio.group>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -221,7 +187,7 @@
                     <!-- Horizontal Navbar (Desktop): minimize di kiri, profile di kanan -->
                     <nav class="hidden lg:flex items-center justify-between px-6 h-16 border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 relative z-20">
                         <div>
-                            <button id="sidebar-minimize-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-white/80" aria-pressed="false">
+                            <button id="sidebar-minimize-btn" type="button" title="Minimize sidebar" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-white/80" aria-pressed="false">
                                 <svg id="sidebar-minimize-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-all duration-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <!-- Modern hamburger (default) toggles to X when compact -->
                                     <!-- We keep the same path id so existing JS continues to work -->
@@ -232,7 +198,7 @@
                         <div class="flex items-center gap-3">
                             <!-- Appearance toggle (Desktop) -->
                             <div class="hidden lg:flex items-center">
-                                <button id="appearance-toggle-btn" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" aria-pressed="false" title="Toggle appearance">
+                                <button id="appearance-toggle-btn" type="button" class="p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" aria-pressed="false" title="Toggle appearance">
                                     <svg id="appearance-toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                         <path id="appearance-toggle-path" stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
                                     </svg>
@@ -331,19 +297,23 @@
         </flux:header>
 
 
-                <div class="flex-1">
+                <div id="main-content" tabindex="-1" class="flex-1">
                     {{ $slot }}
                 </div>
 
-                <!-- Horizontal footer (moved from sidebar for consistency) -->
+                <!-- Horizontal footer (improved for consistency with theme) -->
                 <footer class="w-full border-t border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
-                    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400">
-                        <div>
-                            &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                    <div class="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row items-center sm:items-center justify-between gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        <div class="flex items-center gap-3 text-xs sm:text-sm">
+                            <span class="text-zinc-500 dark:text-zinc-500">&copy; {{ date('Y') }}</span>
+                            <span class="font-medium truncate">{{ config('app.name') }}</span>
+                            <span class="text-zinc-400">·</span>
+                            <span class="text-xs text-zinc-500">All rights reserved</span>
                         </div>
-                        <div class="hidden sm:flex items-center gap-4">
-                            <a href="/privacy" class="hover:underline">Privacy</a>
-                            <a href="/terms" class="hover:underline">Terms</a>
+
+                        <div class="flex items-center gap-4">
+                            <a href="/privacy" class="text-zinc-600 dark:text-zinc-300 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 rounded px-1 py-0.5">Privacy</a>
+                            <a href="/terms" class="text-zinc-600 dark:text-zinc-300 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 rounded px-1 py-0.5">Terms</a>
                         </div>
                     </div>
                 </footer>
