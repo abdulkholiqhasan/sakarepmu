@@ -58,6 +58,26 @@ class AppServiceProvider extends ServiceProvider
             if ($tagline = $settings->get('site_tagline')) {
                 config(['app.tagline' => $tagline]);
             }
+
+            // Locale -> app.locale (and optionally set the translator locale)
+            if ($locale = $settings->get('locale')) {
+                // Basic validation: ensure it's one of configured locales
+                $available = array_keys(config('locales', []));
+                if (in_array($locale, $available, true)) {
+                    config(['app.locale' => $locale]);
+                    try {
+                        // set the translator locale if the translator exists
+                        if (function_exists('app')) {
+                            $app = app();
+                            if ($app && $app->has('translator')) {
+                                $app->make('translator')->setLocale($locale);
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        // ignore translator errors
+                    }
+                }
+            }
         } catch (\Throwable $e) {
             // Defensively ignore any errors during boot to avoid breaking the app when settings file is missing or corrupt.
         }

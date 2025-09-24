@@ -9,6 +9,7 @@ new class extends Component {
     public string $site_url = '';
     public string $admin_email = '';
     public string $timezone = '';
+    public string $locale = '';
 
     public function mount(): void
     {
@@ -19,6 +20,7 @@ new class extends Component {
         $this->site_url = $settings->get('site_url', config('app.url'));
         $this->admin_email = $settings->get('admin_email', config('mail.from.address', ''));
         $this->timezone = $settings->get('timezone', config('app.timezone', 'UTC'));
+        $this->locale = $settings->get('locale', config('app.locale', 'en'));
     }
 
     public function save(): void
@@ -29,6 +31,7 @@ new class extends Component {
             'site_url' => ['required', 'url', 'max:255'],
             'admin_email' => ['required', 'email', 'max:255'],
             'timezone' => ['required', 'string', 'max:100'],
+            'locale' => ['required', 'string', 'max:10'],
         ]);
 
         $settings = new SettingsService();
@@ -39,7 +42,26 @@ new class extends Component {
             'site_url' => $this->site_url,
             'admin_email' => $this->admin_email,
             'timezone' => $this->timezone,
+            'locale' => $this->locale,
         ]);
+
+        // Apply locale immediately for the current request/session when possible
+        try {
+            if (function_exists('app')) {
+                $app = app();
+                if ($app) {
+                    // set application locale and translator locale
+                    if (method_exists($app, 'setLocale')) {
+                        $app->setLocale($this->locale);
+                    }
+                    if ($app->has('translator')) {
+                        $app->make('translator')->setLocale($this->locale);
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // ignore runtime locale failures
+        }
 
         $this->dispatch('general-saved');
     }
@@ -244,6 +266,30 @@ new class extends Component {
                                             @endforeach
                                         </select>
                                         @error('timezone')
+                                            <p class="text-red-600 dark:text-red-400 mt-1 text-xs flex items-center">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                {{ $message }}
+                                            </p>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Locale -->
+                                    <div class="md:col-span-1">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
+                                            {{ __('Language') }}
+                                            <span class="text-red-500">*</span>
+                                        </label>
+                                        <select
+                                            wire:model="locale"
+                                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 transition-colors text-sm"
+                                        >
+                                            @foreach(config('locales') as $key => $label)
+                                                <option value="{{ $key }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('locale')
                                             <p class="text-red-600 dark:text-red-400 mt-1 text-xs flex items-center">
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
