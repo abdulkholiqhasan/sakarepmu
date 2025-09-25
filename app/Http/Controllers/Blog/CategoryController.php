@@ -9,8 +9,17 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    private function ensurePermission($request, string $permission): void
+    {
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission($permission)) {
+            abort(403);
+        }
+    }
+
     public function index()
     {
+        $this->ensurePermission(request(), 'create categories');
         $q = request('q');
 
         $categories = Category::when($q, function ($query, $q) {
@@ -22,11 +31,13 @@ class CategoryController extends Controller
 
     public function create()
     {
+        $this->ensurePermission(request(), 'create categories');
         return view('blog.categories.create');
     }
 
     public function store(Request $request)
     {
+        $this->ensurePermission($request, 'create categories');
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug'],
@@ -43,11 +54,13 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
+        $this->ensurePermission(request(), 'create categories');
         return view('blog.categories.edit', compact('category'));
     }
 
     public function update(Request $request, Category $category)
     {
+        $this->ensurePermission($request, 'create categories');
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,' . $category->id],
@@ -64,6 +77,7 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        $this->ensurePermission(request(), 'create categories');
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Category deleted.');

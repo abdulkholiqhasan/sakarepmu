@@ -11,8 +11,17 @@ use Illuminate\Support\Facades\Storage;
 
 class PagesController extends Controller
 {
+    private function ensurePermission($request, string $permission): void
+    {
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission($permission)) {
+            abort(403);
+        }
+    }
+
     public function index(Request $request)
     {
+        $this->ensurePermission($request, 'manage pages');
         $q = $request->query('q');
         $status = $request->query('status');
 
@@ -30,11 +39,13 @@ class PagesController extends Controller
 
     public function create()
     {
+        $this->ensurePermission(request(), 'manage pages');
         return view('blog.pages.create');
     }
 
     public function store(Request $request)
     {
+        $this->ensurePermission($request, 'manage pages');
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:pages,slug',
@@ -105,16 +116,19 @@ class PagesController extends Controller
 
     public function show(Page $page)
     {
+        $this->ensurePermission(request(), 'manage pages');
         return view('blog.pages.show', compact('page'));
     }
 
     public function edit(Page $page)
     {
+        $this->ensurePermission(request(), 'manage pages');
         return view('blog.pages.edit', compact('page'));
     }
 
     public function update(Request $request, Page $page)
     {
+        $this->ensurePermission($request, 'manage pages');
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:pages,slug,' . $page->id . ',id',
@@ -162,6 +176,7 @@ class PagesController extends Controller
 
     public function destroy(Page $page)
     {
+        $this->ensurePermission(request(), 'manage pages');
         $page->delete();
         return redirect()->route('pages.index')->with('success', 'Page deleted.');
     }

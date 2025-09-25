@@ -9,8 +9,17 @@ use Illuminate\Support\Str;
 
 class MediaController extends Controller
 {
+    private function ensurePermission($request, string $permission): void
+    {
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission($permission)) {
+            abort(403);
+        }
+    }
+
     public function index(Request $request)
     {
+        $this->ensurePermission($request, 'upload files');
         // If request wants JSON (api/browser), return json list; otherwise show blade view
         $query = Media::query();
 
@@ -55,11 +64,13 @@ class MediaController extends Controller
 
     public function create()
     {
+        $this->ensurePermission(request(), 'upload files');
         return view('manage.media.create');
     }
 
     public function store(Request $request)
     {
+        $this->ensurePermission($request, 'upload files');
         $request->validate([
             'file' => 'required|file|max:10240', // max 10MB
         ]);
@@ -113,16 +124,19 @@ class MediaController extends Controller
 
     public function show(Media $media)
     {
+        $this->ensurePermission(request(), 'upload files');
         return view('manage.media.show', compact('media'));
     }
 
     public function edit(Media $media)
     {
+        $this->ensurePermission(request(), 'upload files');
         return view('manage.media.edit', compact('media'));
     }
 
     public function update(Request $request, Media $media)
     {
+        $this->ensurePermission($request, 'upload files');
         $request->validate([
             'filename' => 'required|string|max:255',
         ]);
@@ -136,6 +150,7 @@ class MediaController extends Controller
 
     public function destroy(Media $media)
     {
+        $this->ensurePermission(request(), 'upload files');
         // Delete file from storage
         if (Storage::disk('public')->exists($media->path)) {
             Storage::disk('public')->delete($media->path);

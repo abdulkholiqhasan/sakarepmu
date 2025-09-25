@@ -8,8 +8,17 @@ use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
+    private function ensurePermission($request, string $permission): void
+    {
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission($permission)) {
+            abort(403);
+        }
+    }
+
     public function index()
     {
+        $this->ensurePermission(request(), 'create tags');
         $q = request('q');
 
         $tags = Tag::when($q, function ($query, $q) {
@@ -21,11 +30,13 @@ class TagController extends Controller
 
     public function create()
     {
+        $this->ensurePermission(request(), 'create tags');
         return view('blog.tags.create');
     }
 
     public function store(Request $request)
     {
+        $this->ensurePermission($request, 'create tags');
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:tags,slug'],
@@ -48,11 +59,13 @@ class TagController extends Controller
 
     public function edit(Tag $tag)
     {
+        $this->ensurePermission(request(), 'create tags');
         return view('blog.tags.edit', compact('tag'));
     }
 
     public function update(Request $request, Tag $tag)
     {
+        $this->ensurePermission($request, 'create tags');
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:tags,slug,' . $tag->id],
@@ -69,6 +82,7 @@ class TagController extends Controller
 
     public function destroy(Tag $tag)
     {
+        $this->ensurePermission(request(), 'create tags');
         $tag->delete();
 
         return redirect()->route('tags.index')->with('success', 'Tag deleted.');

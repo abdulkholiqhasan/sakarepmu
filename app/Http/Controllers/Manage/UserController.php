@@ -10,8 +10,13 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        // Intentionally left blank. Permission checks are enforced per-action via ensurePermission().
+    }
     public function index()
     {
+        $this->ensurePermission(request(), 'manage users');
         $q = request('q');
 
         $users = User::with('roles')
@@ -31,6 +36,7 @@ class UserController extends Controller
 
     public function create()
     {
+        $this->ensurePermission(request(), 'manage users');
         $roles = \App\Models\Manage\Role::orderBy('name')->get();
 
         return view('manage.users.create', compact('roles'));
@@ -38,6 +44,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $this->ensurePermission($request, 'manage users');
         // Normalize username to lowercase before validation
         $request->merge(['username' => strtolower((string) $request->input('username', ''))]);
 
@@ -73,6 +80,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->ensurePermission(request(), 'manage users');
         $roles = \App\Models\Manage\Role::orderBy('name')->get();
 
         return view('manage.users.edit', compact('user', 'roles'));
@@ -80,6 +88,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
+        $this->ensurePermission($request, 'manage users');
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
@@ -117,8 +126,17 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        $this->ensurePermission(request(), 'manage users');
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+    }
+
+    private function ensurePermission($request, string $permission): void
+    {
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission($permission)) {
+            abort(403);
+        }
     }
 }

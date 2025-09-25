@@ -40,6 +40,12 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        // Defensive check: ensure the user has permission to create posts
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! $user->hasPermission('create posts')) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
@@ -159,6 +165,12 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
+        // Authorization: administrators and editors can edit any post; other users may only edit their own posts
+        $user = request()->user();
+        if (! $this->canManagePost($user, $post)) {
+            abort(403);
+        }
+
         // Only provide the post's currently selected categories to avoid loading large sets.
         $categories = $post->categories()->orderBy('name')->get();
         return view('blog.posts.edit', compact('post', 'categories'));
@@ -166,6 +178,12 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
+        // Authorization: only allow update if user may manage the post
+        $user = $request->user();
+        if (! $this->canManagePost($user, $post)) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
@@ -292,7 +310,36 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        $user = request()->user();
+        if (! $this->canManagePost($user, $post)) {
+            abort(403);
+        }
+
         $post->delete();
         return redirect()->route('posts.index')->with('success', 'Post deleted.');
+    }
+
+    /**
+     * Determine whether the given user can manage (edit/delete) the given post.
+     * Administrators and editors can manage any post. Other users may only manage posts they own.
+     */
+    private function canManagePost($user, Post $post): bool
+    {
+        if (! $user) return false;
+
+        // If user has role helper available, prefer checking role name
+        if (method_exists($user, 'hasRole')) {
+            if ($user->hasRole('administrator') || $user->hasRole('editor')) {
+                return true;
+            }
+        }
+
+        // Fallback: if the user has a permission that implies managing posts, allow (defense-in-depth)
+        if (method_exists($user, 'hasPermission') && $user->hasPermission('manage posts')) {
+            return true;
+        }
+
+        // Otherwise, allow only if the user is the author
+        return $post->author_id === $user->getKey();
     }
 }

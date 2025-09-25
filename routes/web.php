@@ -81,13 +81,23 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog posts (CRUD)
-    Route::prefix('manage/posts/posts')->name('posts.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create posts'])->group(function () {
+    Route::prefix('manage/posts/posts')->name('posts.')->middleware(['auth'])->group(function () {
         Route::get('/', [App\Http\Controllers\Blog\PostController::class, 'index'])->name('index');
-        Route::get('create', [App\Http\Controllers\Blog\PostController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\Blog\PostController::class, 'store'])->name('store');
-        Route::get('{post}/edit', [App\Http\Controllers\Blog\PostController::class, 'edit'])->name('edit');
-        Route::put('{post}', [App\Http\Controllers\Blog\PostController::class, 'update'])->name('update');
-        Route::delete('{post}', [App\Http\Controllers\Blog\PostController::class, 'destroy'])->name('destroy');
+        Route::get('create', [App\Http\Controllers\Blog\PostController::class, 'create'])->name('create')->middleware(['\\App\\Http\\Middleware\\EnsurePermission:create posts']);
+        Route::post('/', [App\Http\Controllers\Blog\PostController::class, 'store'])->name('store')->middleware(['\\App\\Http\\Middleware\\EnsurePermission:create posts']);
+
+        // Edit/Update require explicit edit posts permission
+        Route::get('{post}/edit', [App\Http\Controllers\Blog\PostController::class, 'edit'])
+            ->name('edit')
+            ->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:edit posts']);
+        Route::put('{post}', [App\Http\Controllers\Blog\PostController::class, 'update'])
+            ->name('update')
+            ->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:edit posts']);
+
+        // Destroy requires delete posts permission
+        Route::delete('{post}', [App\Http\Controllers\Blog\PostController::class, 'destroy'])
+            ->name('destroy')
+            ->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:delete posts']);
     });
 
     // Blog pages (CRUD)

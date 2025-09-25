@@ -179,15 +179,30 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
                                             <div class="flex items-center justify-end space-x-2">
-                                                @permission('edit posts')
+                                                @php
+                                                    $canManage = false;
+                                                    $user = auth()->user();
+                                                    if ($user) {
+                                                        if (method_exists($user, 'hasRole') && ($user->hasRole('administrator') || $user->hasRole('editor'))) {
+                                                            $canManage = true;
+                                                        } elseif (method_exists($user, 'hasPermission') && $user->hasPermission('manage posts')) {
+                                                            $canManage = true;
+                                                        } elseif ($post->author_id === $user->getKey()) {
+                                                            $canManage = true;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @if($canManage && auth()->user()?->hasPermission('edit posts'))
                                                     <button 
                                                         onclick="window.location.href='{{ route('posts.edit', $post) }}'"
                                                         class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                                                     >
                                                         Edit
                                                     </button>
-                                                @endpermission
-                                                @permission('delete posts')
+                                                @endif
+
+                                                @if($canManage && auth()->user()?->hasPermission('delete posts'))
                                                     <form action="{{ route('posts.destroy', $post) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this post?')">
                                                         @csrf
                                                         @method('DELETE')
@@ -198,7 +213,7 @@
                                                             Delete
                                                         </button>
                                                     </form>
-                                                @endpermission
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
