@@ -32,6 +32,10 @@ class ThemeController extends Controller
 
                 $label = ucwords(str_replace(['-', '_'], ' ', $d));
                 $description = null;
+                $author = null;
+                $authorUrl = null;
+                $url = null;
+                $version = null;
 
                 $metaFile = $path . DIRECTORY_SEPARATOR . 'theme.json';
                 if (File::exists($metaFile)) {
@@ -39,6 +43,31 @@ class ThemeController extends Controller
                         $meta = json_decode(File::get($metaFile), true) ?: [];
                         $label = $meta['name'] ?? $label;
                         $description = $meta['description'] ?? null;
+
+                        // Support multiple meta shapes for author/url
+                        if (! empty($meta['author'])) {
+                            if (is_array($meta['author'])) {
+                                $author = $meta['author']['name'] ?? null;
+                                $authorUrl = $meta['author']['url'] ?? null;
+                                // keep theme url separate; author.url should not overwrite theme url
+                                if (empty($url) && ! empty($meta['author']['url'])) {
+                                    // only use as theme url if no top-level url provided
+                                    $url = $meta['author']['url'];
+                                }
+                            } else {
+                                $author = $meta['author'];
+                            }
+                        }
+
+                        // If meta provides a top-level url (repo/site), prefer it when author url not set
+                        if (! empty($meta['url']) && empty($url)) {
+                            $url = $meta['url'];
+                        }
+
+                        // Version
+                        if (! empty($meta['version'])) {
+                            $version = (string) $meta['version'];
+                        }
                     } catch (\Throwable $e) {
                         // ignore malformed meta
                     }
@@ -59,6 +88,10 @@ class ThemeController extends Controller
                     'name' => $label,
                     'description' => $description,
                     'screenshot' => $screenshotUrl,
+                    'author' => $author,
+                    'author_url' => $authorUrl,
+                    'url' => $url,
+                    'version' => $version,
                 ];
             }
         }

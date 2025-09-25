@@ -1,0 +1,9 @@
+{
+    "name": "Default",
+    "description": "The default site theme",
+    "author": {
+        "name": "Abdul Kholiq Hasan",
+        "url": "https://github.com/abdulkholiqhasan"
+    },
+    "version": "1.0.0"
+}

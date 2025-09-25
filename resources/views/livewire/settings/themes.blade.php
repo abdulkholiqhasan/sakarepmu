@@ -77,6 +77,68 @@
                                                 @if($theme['description'])
                                                     <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">{{ $theme['description'] }}</p>
                                                 @endif
+
+                                                {{-- Theme metadata: author, version and url (neatly) --}}
+                                                @php
+                                                    $hasMeta = !empty($theme['author']) || !empty($theme['url']) || !empty($theme['version']);
+                                                @endphp
+                                                @if($hasMeta)
+                                                    <div class="mt-2 text-xs text-gray-500 dark:text-zinc-400">
+                                                        <div class="flex items-center justify-between">
+                                                            <div class="flex items-center space-x-3">
+                                                                @if(!empty($theme['version']))
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-200 font-medium">v{{ $theme['version'] }}</span>
+                                                                @endif
+
+                                                                @if(!empty($theme['author']))
+                                                                    @php
+                                                                        $authorUrl = $theme['author_url'] ?? null;
+                                                                    @endphp
+                                                                    <div class="flex flex-col">
+                                                                        <div class="flex items-center space-x-2">
+                                                                            <span class="text-gray-700 dark:text-zinc-200 font-medium">Author:</span>
+                                                                            @if(!empty($authorUrl))
+                                                                                <a href="{{ $authorUrl }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">{{ $theme['author'] }}</a>
+                                                                            @else
+                                                                                <span>{{ $theme['author'] }}</span>
+                                                                            @endif
+                                                                        </div>
+
+                                                                        @if(!empty($authorUrl))
+                                                                            @php
+                                                                                try {
+                                                                                    $parsedAuthor = parse_url($authorUrl);
+                                                                                    $authorHost = $parsedAuthor['host'] ?? $authorUrl;
+                                                                                } catch (\Exception $e) {
+                                                                                    $authorHost = $authorUrl;
+                                                                                }
+                                                                            @endphp
+                                                                           
+                                                                        @endif
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+
+                                                            {{-- Only show theme.url on the right if author_url is not available --}}
+                                                            @if(empty($theme['author_url']) && !empty($theme['url']))
+                                                                @php
+                                                                    try {
+                                                                        $parsed = parse_url($theme['url']);
+                                                                        $host = $parsed['host'] ?? $theme['url'];
+                                                                    } catch (\Exception $e) {
+                                                                        $host = $theme['url'];
+                                                                    }
+                                                                @endphp
+                                                                <div class="flex items-center space-x-2">
+                                                                    <a href="{{ $theme['url'] }}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M12.293 2.293a1 1 0 011.414 0l4 4A1 1 0 0117.707 8.707L16 7.414V13a1 1 0 11-2 0V6.586L12.293 5.293a1 1 0 010-1.414z"/><path d="M3 5a2 2 0 012-2h5a1 1 0 110 2H5v10h10v-5a1 1 0 112 0v5a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/></svg>
+                                                                        {{ $host }}
+                                                                    </a>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="flex items-center space-x-2">
                                                 @permission('manage settings')
