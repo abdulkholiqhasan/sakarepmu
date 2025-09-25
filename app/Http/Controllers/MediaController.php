@@ -160,4 +160,78 @@ class MediaController extends Controller
 
         return redirect()->route('media.index')->with('success', 'Media deleted');
     }
+
+    /**
+     * Handle WYSIWYG image uploads
+     */
+    public function wysiwygUpload(Request $request)
+    {
+        $this->ensurePermission($request, 'upload files');
+
+        $request->validate([
+            'image' => 'required|image|max:10240', // max 10MB, only images
+        ]);
+
+        $file = $request->file('image');
+
+        // Preserve original filename and store inside date-based folder: uploads/YYYY/MM/DD
+        $originalName = $file->getClientOriginalName();
+
+        // Clean filename to prevent path traversal or invalid characters
+        $filename = basename(preg_replace('/[\\\\\/]+/', '', $originalName));
+
+        $datePath = now()->format('Y') . '/' . now()->format('m') . '/' . now()->format('d');
+        $storageDir = 'uploads/' . $datePath;
+        $fullPath = $storageDir . '/' . $filename;
+
+        // If file with same name exists in the same dated folder, append timestamp
+        if (Storage::disk('public')->exists($fullPath)) {
+            $info = pathinfo($filename);
+            $name = $info['filename'];
+            $ext = $info['extension'] ?? '';
+            $timestamp = time();
+            $filename = $name . '_' . $timestamp . ($ext ? '.' . $ext : '');
+            $fullPath = $storageDir . '/' . $filename;
+        }
+
+        // Store the file with original name (or timestamped version if duplicate)
+        $path = $file->storeAs($storageDir, $filename, 'public');
+
+        try {
+            $media = Media::create([
+                'filename' => $filename,
+                'path' => $path,
+                'mime_type' => $file->getClientMimeType(),
+                'size' => $file->getSize(),
+                'user_id' => $request->user()?->id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'url' => $media->url,
+                'filename' => $filename,
+                'id' => $media->id
+            ]);
+        } catch (\Throwable $e) {
+            // Delete stored file if DB insert fails
+            try {
+                if (Storage::disk('public')->exists($path)) {
+                    Storage::disk('public')->delete($path);
+                }
+            } catch (\Throwable $_) {
+                // ignore delete errors
+            }
+
+            logger()->error('Failed to create media record after storing WYSIWYG image', [
+                'exception' => $e,
+                'path' => $path,
+                'user_id' => $request->user()?->id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed (internal error). Please try again.'
+            ], 500);
+        }
+    }
 }

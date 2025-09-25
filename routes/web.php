@@ -111,6 +111,11 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('{page}', [App\Http\Controllers\Blog\PagesController::class, 'destroy'])->name('destroy');
     });
 
+    // WYSIWYG image upload endpoint
+    Route::post('wysiwyg/upload-image', [App\Http\Controllers\MediaController::class, 'wysiwygUpload'])
+        ->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:upload files'])
+        ->name('wysiwyg.upload');
+
     // Media library (CRUD)
     Route::prefix('manage/media')->name('media.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:upload files'])->group(function () {
         Route::get('/', [App\Http\Controllers\MediaController::class, 'index'])->name('index');

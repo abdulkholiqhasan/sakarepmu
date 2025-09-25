@@ -487,7 +487,62 @@
 
             const quill = new Quill(editorEl, {
                 theme: 'snow',
-                modules: { toolbar: toolbarOptions }
+                modules: { 
+                    toolbar: {
+                        container: toolbarOptions,
+                        handlers: {
+                            image: function() {
+                                const input = document.createElement('input');
+                                input.setAttribute('type', 'file');
+                                input.setAttribute('accept', 'image/*');
+                                input.click();
+
+                                input.onchange = () => {
+                                    const file = input.files[0];
+                                    if (file) {
+                                        const formData = new FormData();
+                                        formData.append('image', file);
+
+                                        // Show loading indicator by inserting a temporary text
+                                        const range = this.quill.getSelection(true);
+                                        this.quill.insertText(range.index, '[Uploading image...]');
+
+                                        // Get CSRF token
+                                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                                        fetch('{{ route('wysiwyg.upload') }}', {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-CSRF-TOKEN': token,
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            if (result.success) {
+                                                // Replace loading text with actual uploaded image
+                                                this.quill.deleteText(range.index, '[Uploading image...]'.length);
+                                                this.quill.insertEmbed(range.index, 'image', result.url);
+                                                this.quill.setSelection(range.index + 1);
+                                            } else {
+                                                // Remove loading text and show error
+                                                this.quill.deleteText(range.index, '[Uploading image...]'.length);
+                                                alert('Upload failed: ' + (result.message || 'Unknown error'));
+                                            }
+                                        })
+                                        .catch(error => {
+                                            // Remove loading text and show error
+                                            this.quill.deleteText(range.index, '[Uploading image...]'.length);
+                                            console.error('Upload error:', error);
+                                            alert('Upload failed. Please try again.');
+                                        });
+                                    }
+                                };
+                            }
+                        }
+                    }
+                }
             });
             editorEl.__quill = quill;
 
