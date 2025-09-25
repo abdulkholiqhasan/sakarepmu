@@ -102,11 +102,21 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Publish immediately</label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm text-gray-600 dark:text-zinc-400">Publish immediately</label>
+                                <button 
+                                    type="button" 
+                                    onclick="resetPublishDateToNow()"
+                                    class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                                >
+                                    Reset to now
+                                </button>
+                            </div>
                             <input 
                                 name="published_at" 
+                                id="published_at"
                                 type="datetime-local" 
-                                value="{{ old('published_at') }}" 
+                                value="{{ old('published_at', now()->format('Y-m-d\TH:i')) }}" 
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
                             />
                             @error('published_at') 
@@ -335,4 +345,17 @@
             });
         }
     })();
+
+    // Function to reset publish date to current time (global scope)
+    function resetPublishDateToNow() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+        document.getElementById('published_at').value = currentDateTime;
+    }
 </script>

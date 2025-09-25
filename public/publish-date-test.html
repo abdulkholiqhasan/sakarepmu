@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Publish Date Reset Test</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background: #f5f5f5;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .field-group {
+                margin-bottom: 20px;
+            }
+            .label-with-button {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5px;
+            }
+            label {
+                font-weight: 600;
+                color: #374151;
+            }
+            .reset-btn {
+                font-size: 12px;
+                color: #2563eb;
+                background: none;
+                border: none;
+                cursor: pointer;
+                text-decoration: underline;
+            }
+            .reset-btn:hover {
+                color: #1d4ed8;
+            }
+            input[type="datetime-local"] {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            .test-result {
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 6px;
+                font-family: monospace;
+            }
+            .success {
+                background: #dcfce7;
+                border: 1px solid #16a34a;
+                color: #166534;
+            }
+            .info {
+                background: #dbeafe;
+                border: 1px solid #2563eb;
+                color: #1e40af;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Publish Date Reset Function Test</h1>
+
+            <div class="field-group">
+                <div class="label-with-button">
+                    <label for="published_at">Publish Date</label>
+                    <button
+                        type="button"
+                        onclick="resetPublishDateToNow()"
+                        class="reset-btn"
+                    >
+                        Reset to now
+                    </button>
+                </div>
+                <input
+                    type="datetime-local"
+                    id="published_at"
+                    value="2025-01-01T12:00"
+                />
+            </div>
+
+            <button
+                onclick="testFunction()"
+                style="
+                    padding: 10px 20px;
+                    background: #2563eb;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                "
+            >
+                Test Reset Function
+            </button>
+
+            <div id="test-results"></div>
+
+            <div class="test-result info">
+                <strong>Instructions:</strong><br />
+                1. The field above should start with "2025-01-01T12:00"<br />
+                2. Click "Reset to now" button - it should update to current
+                date/time<br />
+                3. Click "Test Reset Function" for automated verification
+            </div>
+        </div>
+
+        <script>
+            // Function to reset publish date to current time (global scope)
+            function resetPublishDateToNow() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, "0");
+                const day = String(now.getDate()).padStart(2, "0");
+                const hours = String(now.getHours()).padStart(2, "0");
+                const minutes = String(now.getMinutes()).padStart(2, "0");
+
+                const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                document.getElementById("published_at").value = currentDateTime;
+
+                console.log("Reset to:", currentDateTime);
+            }
+
+            function testFunction() {
+                const resultsDiv = document.getElementById("test-results");
+                const input = document.getElementById("published_at");
+                const originalValue = input.value;
+
+                // Test the function
+                resetPublishDateToNow();
+
+                const newValue = input.value;
+                const now = new Date();
+                const expectedPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+                let result = '<div class="test-result ';
+
+                if (
+                    newValue !== originalValue &&
+                    expectedPattern.test(newValue)
+                ) {
+                    result +=
+                        'success">✅ SUCCESS: Function works correctly!<br>';
+                    result += `Original: ${originalValue}<br>`;
+                    result += `Updated: ${newValue}<br>`;
+                    result += `Current time: ${now.toISOString().slice(0, 16)}`;
+                } else {
+                    result +=
+                        'error" style="background: #fef2f2; border-color: #dc2626; color: #991b1b;">❌ ERROR: Function failed!<br>';
+                    result += `Value didn't change or format is wrong<br>`;
+                    result += `Value: ${newValue}`;
+                }
+
+                result += "</div>";
+                resultsDiv.innerHTML = result;
+            }
+
+            // Initialize with current time on page load
+            document.addEventListener("DOMContentLoaded", function () {
+                // Show current time for reference
+                const now = new Date();
+                const currentTimeDiv = document.createElement("div");
+                currentTimeDiv.className = "test-result info";
+                currentTimeDiv.innerHTML = `<strong>Current Browser Time:</strong> ${now.toLocaleString()}`;
+                document
+                    .querySelector(".container")
+                    .appendChild(currentTimeDiv);
+            });
+        </script>
+    </body>
+</html>
