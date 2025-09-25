@@ -36,8 +36,8 @@ test('general settings can be saved', function () {
     ]);
 
     $this->actingAs($user);
-    // ensure no leftover file
-    @unlink(storage_path('app/settings.json'));
+    // ensure no leftover file (use configured settings.file)
+    @unlink(config('settings.file'));
 
     $response = Volt::test('settings.general')
         ->set('site_title', 'My Site')
@@ -49,17 +49,12 @@ test('general settings can be saved', function () {
 
     $response->assertHasNoErrors();
 
-    // Assert storage file contains the saved values
-    $this->assertFileExists(storage_path('app/settings.json'));
+    // Assert persisted values via SettingsService (DB or file fallback)
+    $settings = new \App\Services\SettingsService();
 
-    $contents = json_decode(file_get_contents(storage_path('app/settings.json')), true);
-
-    expect($contents['site_title'])->toEqual('My Site');
-    expect($contents['site_tagline'])->toEqual('An awesome site');
-    expect($contents['site_url'])->toEqual('https://example.test');
-    expect($contents['admin_email'])->toEqual('admin@example.test');
-    expect($contents['timezone'])->toEqual('UTC');
-
-    // cleanup
-    @unlink(storage_path('app/settings.json'));
+    expect($settings->get('site_title'))->toEqual('My Site');
+    expect($settings->get('site_tagline'))->toEqual('An awesome site');
+    expect($settings->get('site_url'))->toEqual('https://example.test');
+    expect($settings->get('admin_email'))->toEqual('admin@example.test');
+    expect($settings->get('timezone'))->toEqual('UTC');
 });
