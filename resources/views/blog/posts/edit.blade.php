@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <form action="{{ route('posts.update', $post) }}" method="POST" class="flex flex-col lg:flex-row">
+    <form action="{{ route('posts.update', $post) }}" method="POST" enctype="multipart/form-data" class="flex flex-col lg:flex-row">
             @csrf
             @method('PUT')
             <!-- Main content area (Admin-style 75% width on desktop, full width on mobile) -->
@@ -165,7 +165,7 @@
                                 $selected = old('categories', $post->categories->pluck('id')->toArray());
                             @endphp
                             @foreach($selected as $selId)
-                                @php $cat = \\App\\Models\\Blog\\Category::find($selId); @endphp
+                                @php $cat = \App\Models\Blog\Category::find($selId); @endphp
                                 @if($cat)
                                     <option value="{{ $cat->id }}" selected>{{ $cat->name }}</option>
                                 @endif

@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        <form action="{{ route('pages.store') }}" method="POST" class="flex flex-col lg:flex-row">
+    <form action="{{ route('pages.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col lg:flex-row">
             @csrf
             <!-- Main content area (Admin-style 75% width on desktop, full width on mobile) -->
             <div class="w-full lg:w-3/4 px-4 sm:px-6 py-6">

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Blog\Post;
 use App\Models\Blog\Category;
 use App\Models\Blog\Tag;
+use App\Models\Media;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -89,8 +91,40 @@ class PostController extends Controller
         // handle uploaded featured image file
         if ($request->hasFile('featured_image_file')) {
             $file = $request->file('featured_image_file');
-            $path = \Illuminate\Support\Facades\Storage::disk('public')->putFile('uploads', $file);
-            $data['featured_image'] = \Illuminate\Support\Facades\Storage::url($path);
+            $originalName = $file->getClientOriginalName();
+            $filename = basename(preg_replace('/[\\\\\/]+/', '', (string) $originalName));
+            $datePath = now()->format('Y') . '/' . now()->format('m') . '/' . now()->format('d');
+            $storageDir = 'uploads/' . $datePath;
+            $fullPath = $storageDir . '/' . $filename;
+            // If file with same name exists in the same dated folder, reject upload to avoid overwrite
+            if (Storage::disk('public')->exists($fullPath)) {
+                return back()->withErrors(['featured_image_file' => 'A file with that name already exists for today. Please rename your file and try again.'])->withInput();
+            }
+            $path = $file->storeAs($storageDir, $filename, 'public');
+
+            // create a Media record so the uploaded file appears in the media library
+            try {
+                $media = Media::create([
+                    'filename' => $filename,
+                    'path' => $path,
+                    'mime_type' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                    'user_id' => $request->user()?->id,
+                ]);
+                $data['featured_image'] = $media->url;
+            } catch (\Throwable $e) {
+                // delete stored file if DB insert fails
+                try {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                } catch (\Throwable $_) {
+                    // ignore delete errors
+                }
+
+                logger()->error('Failed to create media record after storing featured image', ['exception' => $e, 'path' => $path, 'user_id' => $request->user()?->id]);
+                return back()->withErrors(['featured_image_file' => 'Upload failed (internal error). Please try again.'])->withInput();
+            }
         }
 
         $post = Post::create($data);
@@ -188,8 +222,37 @@ class PostController extends Controller
         // handle uploaded featured image file
         if ($request->hasFile('featured_image_file')) {
             $file = $request->file('featured_image_file');
-            $path = \Illuminate\Support\Facades\Storage::disk('public')->putFile('uploads', $file);
-            $data['featured_image'] = \Illuminate\Support\Facades\Storage::url($path);
+            $originalName = $file->getClientOriginalName();
+            $filename = basename(preg_replace('/[\\\\\/]+/', '', (string) $originalName));
+            $datePath = now()->format('Y') . '/' . now()->format('m') . '/' . now()->format('d');
+            $storageDir = 'uploads/' . $datePath;
+            $fullPath = $storageDir . '/' . $filename;
+            // If file with same name exists in the same dated folder, reject upload to avoid overwrite
+            if (Storage::disk('public')->exists($fullPath)) {
+                return back()->withErrors(['featured_image_file' => 'A file with that name already exists for today. Please rename your file and try again.'])->withInput();
+            }
+            $path = $file->storeAs($storageDir, $filename, 'public');
+
+            try {
+                $media = Media::create([
+                    'filename' => $filename,
+                    'path' => $path,
+                    'mime_type' => $file->getClientMimeType(),
+                    'size' => $file->getSize(),
+                    'user_id' => $request->user()?->id,
+                ]);
+                $data['featured_image'] = $media->url;
+            } catch (\Throwable $e) {
+                try {
+                    if (Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->delete($path);
+                    }
+                } catch (\Throwable $_) {
+                }
+
+                logger()->error('Failed to create media record after storing featured image', ['exception' => $e, 'path' => $path, 'user_id' => $request->user()?->id]);
+                return back()->withErrors(['featured_image_file' => 'Upload failed (internal error). Please try again.'])->withInput();
+            }
         }
 
         $post->update($data);

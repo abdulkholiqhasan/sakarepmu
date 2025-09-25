@@ -42,7 +42,7 @@
             </div>
         @endif
 
-        <form action="{{ route('pages.update', $page) }}" method="POST" class="flex flex-col lg:flex-row">
+    <form action="{{ route('pages.update', $page) }}" method="POST" enctype="multipart/form-data" class="flex flex-col lg:flex-row">
             @csrf
             @method('PUT')
             <!-- Main content area (Admin-style 75% width on desktop, full width on mobile) -->
