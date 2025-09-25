@@ -17,6 +17,10 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
     Volt::route('settings/password', 'settings.password')->name('password.edit');
     Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
+    // Theme management (list and activate)
+    Route::get('settings/appearance/themes', [App\Http\Controllers\Settings\ThemeController::class, 'index'])->name('appearance.themes');
+    Route::post('settings/appearance/themes/activate', [App\Http\Controllers\Settings\ThemeController::class, 'activate'])->name('appearance.themes.activate');
+    Route::get('settings/appearance/themes/screenshot/{theme}', [App\Http\Controllers\Settings\ThemeController::class, 'screenshot'])->name('themes.screenshot');
     // Restrict general settings to administrators only
     Volt::route('settings/general', 'settings.general')
         ->name('general.edit')

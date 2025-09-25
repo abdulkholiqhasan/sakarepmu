@@ -73,6 +73,25 @@ class SettingsServiceProvider extends ServiceProvider
                     }
                 }
             }
+
+            // If a theme is active in settings, prepend its resources/views path so
+            // theme templates override the application's views.
+            try {
+                $activeTheme = $settings->get('theme');
+                if ($activeTheme) {
+                    $themeViews = resource_path('themes' . DIRECTORY_SEPARATOR . $activeTheme . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'views');
+                    if (is_dir($themeViews)) {
+                        // Prepend theme views path so it takes precedence over default resource views
+                        $paths = config('view.paths', []);
+                        if (! in_array($themeViews, $paths, true)) {
+                            array_unshift($paths, $themeViews);
+                            config(['view.paths' => $paths]);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // ignore theme boot errors
+            }
         } catch (\Throwable $e) {
             // Defensive: don't break app boot if settings file missing or corrupt
         }
