@@ -266,6 +266,66 @@
             .wysiwyg-component .ql-table-embed td, .wysiwyg-component .ql-table-embed th { border: 1px solid rgba(0,0,0,0.12); padding: .5rem; }
             .wysiwyg-component .ql-table-embed thead th { background: rgba(0,0,0,0.04); font-weight: 600; }
             
+            /* Image alignment styles */
+            .wysiwyg-component .ql-editor img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 0.5rem 0;
+                border-radius: 4px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                transition: box-shadow 0.2s ease;
+            }
+            
+            .wysiwyg-component .ql-editor img:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            
+            .wysiwyg-component .ql-editor .ql-align-center img,
+            .wysiwyg-component .ql-editor p.ql-align-center img {
+                margin-left: auto;
+                margin-right: auto;
+                display: block;
+            }
+            
+            .wysiwyg-component .ql-editor .ql-align-right img,
+            .wysiwyg-component .ql-editor p.ql-align-right img {
+                margin-left: auto;
+                margin-right: 0;
+                display: block;
+            }
+            
+            .wysiwyg-component .ql-editor .ql-align-left img,
+            .wysiwyg-component .ql-editor p.ql-align-left img {
+                margin-left: 0;
+                margin-right: auto;
+                display: block;
+            }
+            
+            .wysiwyg-component .ql-editor .ql-align-justify img,
+            .wysiwyg-component .ql-editor p.ql-align-justify img {
+                margin-left: 0;
+                margin-right: auto;
+                display: block;
+            }
+            
+            /* Mobile responsive image alignment */
+            @media (max-width: 640px) {
+                .wysiwyg-component .ql-editor img {
+                    max-width: 100%;
+                    margin: 0.5rem auto;
+                }
+                
+                .wysiwyg-component .ql-editor .ql-align-right img,
+                .wysiwyg-component .ql-editor p.ql-align-right img,
+                .wysiwyg-component .ql-editor .ql-align-left img,
+                .wysiwyg-component .ql-editor p.ql-align-left img {
+                    /* On mobile, center all images for better readability */
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+            }
+            
             /* Dark mode styling (class-based) */
             .dark .wysiwyg-component .ql-toolbar {
                 background: rgb(39 39 42);
@@ -426,6 +486,17 @@
                 font-weight: 700; 
             }
             
+            /* Dark mode image styles */
+            .dark .wysiwyg-component .ql-editor img {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .dark .wysiwyg-component .ql-editor img:hover {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                border-color: rgba(255, 255, 255, 0.2);
+            }
+            
             /* Legacy dark mode support (prefers-color-scheme) */
             @media (prefers-color-scheme: dark) {
                 .wysiwyg-component .ql-toolbar {
@@ -523,8 +594,25 @@
                                             if (result.success) {
                                                 // Replace loading text with actual uploaded image
                                                 this.quill.deleteText(range.index, '[Uploading image...]'.length);
+                                                
+                                                // Insert the image in a way that supports alignment
+                                                // First insert a newline to ensure we're on a new line
+                                                if (range.index > 0) {
+                                                    const prevChar = this.quill.getText(range.index - 1, 1);
+                                                    if (prevChar !== '\n') {
+                                                        this.quill.insertText(range.index, '\n');
+                                                        range.index += 1;
+                                                    }
+                                                }
+                                                
+                                                // Insert the image
                                                 this.quill.insertEmbed(range.index, 'image', result.url);
-                                                this.quill.setSelection(range.index + 1);
+                                                
+                                                // Add line break after image for better editing experience
+                                                this.quill.insertText(range.index + 1, '\n');
+                                                
+                                                // Set selection to the line with the image for alignment
+                                                this.quill.setSelection(range.index, 0);
                                             } else {
                                                 // Remove loading text and show error
                                                 this.quill.deleteText(range.index, '[Uploading image...]'.length);
