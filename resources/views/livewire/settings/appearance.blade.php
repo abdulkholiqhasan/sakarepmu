@@ -6,7 +6,7 @@ new class extends Component {
     //
 }; ?>
 
-@section('title', __('Settings') . ' / ' . __('Appearance'))
+@section('title', __('Settings') . ' / ' . __('Displays'))
 
 <div class="bg-white dark:bg-zinc-900 min-h-screen">
     <!-- Admin-style header -->
@@ -82,8 +82,8 @@ new class extends Component {
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Appearance') }}</h2>
-                                <p class="text-sm text-gray-500 dark:text-zinc-400">{{ __('Update the appearance settings for your account') }}</p>
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Display') }}</h2>
+                                <p class="text-sm text-gray-500 dark:text-zinc-400">{{ __('Update the display settings for your account') }}</p>
                             </div>
                         </div>
                     </div>
