@@ -1,4 +1,4 @@
-<?php $title = __('Edit Post'); ?>
+<?php $title = 'Edit Post'; ?>
 <x-layouts.app :title="$title ?? null">
     <div class="bg-white dark:bg-zinc-900 min-h-screen">
         <!-- Admin-style header -->
@@ -137,7 +137,7 @@
                                     value="update" 
                                     class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-3 px-4 rounded text-sm transition-colors touch-manipulation"
                                 >
-                                    Update
+                                    Update & Publish
                                 </button>
                                 <button 
                                     type="submit" 
@@ -213,20 +213,22 @@
                             <input 
                                 type="text" 
                                 id="tag-search" 
-                                placeholder="Add new tag" 
+                                placeholder="@permission('create tags')Add new tag@elseSearch tags...@endpermission" 
                                 class="w-full px-3 py-3 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500" 
                                 autocomplete="off" 
                             />
                             <div id="tag-suggestions" class="absolute left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded shadow-lg max-h-48 overflow-auto hidden z-50"></div>
                         </div>
                         
-                        <button 
-                            type="button" 
-                            id="tag-add-btn" 
-                            class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 font-medium py-3 px-3 rounded text-sm mb-3 transition-colors touch-manipulation"
-                        >
-                            Add
-                        </button>
+                        @permission('create tags')
+                            <button 
+                                type="button" 
+                                id="tag-add-btn" 
+                                class="w-full bg-gray-100 hover:bg-gray-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-gray-700 dark:text-zinc-300 font-medium py-3 px-3 rounded text-sm mb-3 transition-colors touch-manipulation"
+                            >
+                                Add
+                            </button>
+                        @endpermission
                         
                         <!-- Selected tags -->
                         <div id="selected-tags" class="flex flex-wrap gap-2"></div>
@@ -278,6 +280,9 @@
 
 <!-- Admin-style JavaScript -->
 <script>
+    // Permission flag exposed to JS: whether current user may create tags
+    window.canCreateTags = @json(auth()->user() && method_exists(auth()->user(), 'hasPermission') && auth()->user()->hasPermission('create tags'));
+
     // Auto-generate slug from title (Admin style) - For edit page, assume initially edited
     (function(){
         const title = document.querySelector('input[name="title"]');
@@ -463,6 +468,12 @@
         function addTagFromInput(){
             const name = search.value.trim();
             if(!name) return;
+            // Do not allow creating new tags client-side if user lacks permission
+            if(!window.canCreateTags){
+                const existingOpt = Array.from(select.options).find(o => String(o.text).toLowerCase() === name.toLowerCase());
+                if(existingOpt){ existingOpt.selected = true; renderSelected(); search.value = ''; suggestions.classList.add('hidden'); }
+                return;
+            }
             const newId = 'new:'+name;
             let opt = Array.from(select.options).find(o=>o.value===newId);
             if(!opt){ 
@@ -481,6 +492,11 @@
         search.addEventListener('keydown', (e)=>{
             if(e.key === 'Enter'){
                 e.preventDefault();
+                if(!window.canCreateTags){
+                    const firstSuggestion = suggestions.querySelector('div');
+                    if(firstSuggestion){ firstSuggestion.click(); }
+                    return;
+                }
                 addTagFromInput();
             }
         });

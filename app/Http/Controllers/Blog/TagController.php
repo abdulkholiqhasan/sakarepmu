@@ -79,6 +79,14 @@ class TagController extends Controller
      */
     public function search(Request $request)
     {
+        // Allow search for authenticated users who can create/edit posts.
+        $user = $request->user();
+        if (! $user || ! method_exists($user, 'hasPermission') || ! (
+            $user->hasPermission('create posts') || $user->hasPermission('edit posts') || $user->hasPermission('manage posts')
+        )) {
+            abort(403);
+        }
+
         $q = $request->query('q');
 
         $results = Tag::when($q, function ($query, $q) {

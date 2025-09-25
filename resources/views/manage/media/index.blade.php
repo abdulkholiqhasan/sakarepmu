@@ -9,12 +9,14 @@
                     <p class="mt-1 text-sm text-gray-500 dark:text-zinc-400">Manage uploaded files — upload, view, and delete media</p>
                 </div>
                 <div>
-                    <button 
-                        onclick="window.location.href='{{ route('media.create') }}'"
-                        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
-                    >
-                        Upload Media
-                    </button>
+                    @permission('upload files')
+                        <button 
+                            onclick="window.location.href='{{ route('media.create') }}'"
+                            class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors"
+                        >
+                            Upload Media
+                        </button>
+                    @endpermission
                 </div>
             </div>
         </div>
@@ -84,15 +86,17 @@
                             @endif
                         </p>
                         @if(!request('q'))
-                            <button 
-                                onclick="window.location.href='{{ route('media.create') }}'"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                            >
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                                Upload your first file
-                            </button>
+                            @permission('upload files')
+                                <button 
+                                    onclick="window.location.href='{{ route('media.create') }}'"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                    </svg>
+                                    Upload your first file
+                                </button>
+                            @endpermission
                         @endif
                     </div>
                 @else
@@ -167,22 +171,26 @@
                                                 >
                                                     View
                                                 </button>
-                                                <button 
-                                                    onclick="window.location.href='{{ route('media.edit', $item) }}'"
-                                                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <form action="{{ route('media.destroy', $item) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this media file?')">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                @permission('upload files|edit media')
                                                     <button 
-                                                        type="submit" 
-                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-md transition-colors"
+                                                        onclick="window.location.href='{{ route('media.edit', $item) }}'"
+                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 rounded-md transition-colors"
                                                     >
-                                                        Delete
+                                                        Edit
                                                     </button>
-                                                </form>
+                                                @endpermission
+                                                @permission('delete media')
+                                                    <form action="{{ route('media.destroy', $item) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this media file?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button 
+                                                            type="submit" 
+                                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-md transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                @endpermission
                                             </div>
                                         </td>
                                     </tr>

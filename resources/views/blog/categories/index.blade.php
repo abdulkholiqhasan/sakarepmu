@@ -9,12 +9,14 @@
                     <span class="text-sm text-gray-500 dark:text-zinc-400">({{ $categories->total() }})</span>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <button 
-                        onclick="window.location.href='{{ route('categories.create') }}'"
-                        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors touch-manipulation"
-                    >
-                        Add New
-                    </button>
+                    @permission('create categories')
+                        <button 
+                            onclick="window.location.href='{{ route('categories.create') }}'"
+                            class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors touch-manipulation"
+                        >
+                            Add New
+                        </button>
+                    @endpermission
                 </div>
             </div>
         </div>
@@ -38,7 +40,7 @@
             </div>
 
         <div class="bg-white dark:bg-zinc-800 shadow rounded-lg overflow-hidden">
-            @if($categories->isEmpty())
+                    @if($categories->isEmpty())
                 <div class="p-8 text-center">
                     <div class="text-gray-400 dark:text-zinc-500 mb-4">
                         <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,12 +49,14 @@
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No categories yet</h3>
                     <p class="text-gray-500 dark:text-zinc-400 mb-4">Get started by creating your first category.</p>
-                    <button 
-                        onclick="window.location.href='{{ route('categories.create') }}'"
-                        class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors touch-manipulation"
-                    >
-                        Create Category
-                    </button>
+                    @permission('create categories')
+                        <button 
+                            onclick="window.location.href='{{ route('categories.create') }}'"
+                            class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors touch-manipulation"
+                        >
+                            Create Category
+                        </button>
+                    @endpermission
                 </div>
             @else
                 <div class="overflow-x-auto">
@@ -75,22 +79,26 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
                                         <div class="flex items-center justify-end space-x-2">
-                                            <button 
-                                                onclick="window.location.href='{{ route('categories.edit', $category) }}'"
-                                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors"
-                                            >
-                                                Edit
-                                            </button>
-                                            <form action="{{ route('categories.destroy', $category) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this category?')">
-                                                @csrf
-                                                @method('DELETE')
+                                            @permission('edit categories')
                                                 <button 
-                                                    type="submit" 
-                                                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors"
+                                                    onclick="window.location.href='{{ route('categories.edit', $category) }}'"
+                                                    class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium transition-colors"
                                                 >
-                                                    Delete
+                                                    Edit
                                                 </button>
-                                            </form>
+                                            @endpermission
+                                            @permission('delete categories')
+                                                <form action="{{ route('categories.destroy', $category) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this category?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button 
+                                                        type="submit" 
+                                                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            @endpermission
                                         </div>
                                     </td>
                                 </tr>

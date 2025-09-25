@@ -8,7 +8,9 @@
                     <p class="text-sm text-gray-500 dark:text-zinc-400">Published: {{ $page->published ? $page->published_at?->toDayDateTimeString() : 'Draft' }}</p>
                 </div>
                 <div class="space-x-2">
-                    <flux:button :href="route('pages.edit', $page)" variant="ghost">Edit</flux:button>
+                    @permission('manage pages|edit pages')
+                        <flux:button :href="route('pages.edit', $page)" variant="ghost">Edit</flux:button>
+                    @endpermission
                     <flux:button :href="route('pages.index')" variant="ghost">Back</flux:button>
                 </div>
             </div>

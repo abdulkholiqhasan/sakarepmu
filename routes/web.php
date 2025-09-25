@@ -51,9 +51,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog categories for posts (CRUD)
+    // AJAX search endpoint for categories (used by post forms) — allow users who can create posts to search categories
+    Route::get('manage/posts/categories/search', [App\Http\Controllers\Blog\CategoryController::class, 'search'])
+        ->name('categories.search')
+        ->middleware(['auth']);
+
     Route::prefix('manage/posts/categories')->name('categories.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create categories'])->group(function () {
-        // AJAX search endpoint for categories (used by post forms)
-        Route::get('search', [App\Http\Controllers\Blog\CategoryController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\CategoryController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\CategoryController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\CategoryController::class, 'store'])->name('store');
@@ -63,9 +66,12 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Blog tags for posts (CRUD)
+    // AJAX search endpoint for tags (used by post forms) — allow users who can create posts to search tags
+    Route::get('manage/posts/tags/search', [App\Http\Controllers\Blog\TagController::class, 'search'])
+        ->name('tags.search')
+        ->middleware(['auth']);
+
     Route::prefix('manage/posts/tags')->name('tags.')->middleware(['auth', '\\App\\Http\\Middleware\\EnsurePermission:create tags'])->group(function () {
-        // AJAX search endpoint for tags (used by post forms)
-        Route::get('search', [App\Http\Controllers\Blog\TagController::class, 'search'])->name('search');
         Route::get('/', [App\Http\Controllers\Blog\TagController::class, 'index'])->name('index');
         Route::get('create', [App\Http\Controllers\Blog\TagController::class, 'create'])->name('create');
         Route::post('/', [App\Http\Controllers\Blog\TagController::class, 'store'])->name('store');

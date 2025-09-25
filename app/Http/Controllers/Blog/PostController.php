@@ -63,9 +63,11 @@ class PostController extends Controller
             if (empty($data['published_at'])) {
                 $data['published_at'] = now();
             }
+            $data['status'] = 'published';
         } elseif ($action === 'draft') {
             $data['published'] = false;
             $data['published_at'] = null;
+            $data['status'] = 'draft';
         } else {
             $data['published'] = $request->has('published') ? (bool) $request->input('published') : false;
         }
@@ -136,11 +138,14 @@ class PostController extends Controller
 
         // create new tags only when the post is published (new tags remain draft otherwise)
         if (!empty($data['published']) && $request->filled('new_tags')) {
-            $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
-            foreach ($newNames as $name) {
-                if (!$name) continue;
-                $tag = Tag::firstOrCreate(['name' => $name], ['slug' => Tag::generateUniqueSlug($name)]);
-                $post->tags()->syncWithoutDetaching([$tag->id]);
+            // only create new tag records if the current user has permission to create tags
+            if ($request->user() && method_exists($request->user(), 'hasPermission') && $request->user()->hasPermission('create tags')) {
+                $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
+                foreach ($newNames as $name) {
+                    if (!$name) continue;
+                    $tag = Tag::firstOrCreate(['name' => $name], ['slug' => Tag::generateUniqueSlug($name)]);
+                    $post->tags()->syncWithoutDetaching([$tag->id]);
+                }
             }
         }
 
@@ -180,15 +185,17 @@ class PostController extends Controller
         // Handle action buttons: 'update' (normal save), 'revert' (revert to draft), 'publish', 'draft'
         $action = $request->input('action');
 
-        if ($action === 'publish') {
+        if ($action === 'publish' || $action === 'update') {
             $data['published'] = true;
             if (empty($data['published_at'])) {
                 $data['published_at'] = now();
             }
+            $data['status'] = 'published';
         } elseif ($action === 'revert' || $action === 'draft') {
             // revert to draft
             $data['published'] = false;
             $data['published_at'] = null;
+            $data['status'] = 'draft';
         } else {
             $data['published'] = $request->has('published') ? (bool) $request->input('published') : false;
             // published_at: if user did not provide it in the update payload, keep existing published_at
@@ -265,11 +272,14 @@ class PostController extends Controller
         }
 
         if (!empty($data['published']) && $request->filled('new_tags')) {
-            $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
-            foreach ($newNames as $name) {
-                if (!$name) continue;
-                $tag = Tag::firstOrCreate(['name' => $name], ['slug' => Tag::generateUniqueSlug($name)]);
-                $post->tags()->syncWithoutDetaching([$tag->id]);
+            // only create new tag records if the current user has permission to create tags
+            if ($request->user() && method_exists($request->user(), 'hasPermission') && $request->user()->hasPermission('create tags')) {
+                $newNames = array_filter(array_map('trim', explode(',', $request->input('new_tags'))));
+                foreach ($newNames as $name) {
+                    if (!$name) continue;
+                    $tag = Tag::firstOrCreate(['name' => $name], ['slug' => Tag::generateUniqueSlug($name)]);
+                    $post->tags()->syncWithoutDetaching([$tag->id]);
+                }
             }
         }
 

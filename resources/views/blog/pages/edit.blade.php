@@ -147,7 +147,7 @@
                                     value="update" 
                                     class="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium py-3 px-4 rounded text-sm transition-colors touch-manipulation"
                                 >
-                                    Update
+                                    Update & Publish
                                 </button>
                                 @if(isset($page->published_at) && $page->published_at)
                                     <button 
