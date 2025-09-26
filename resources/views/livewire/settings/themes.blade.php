@@ -121,18 +121,18 @@
                                                 @endif
                                             </div>
                                             <div class="flex items-center space-x-2">
-                                                @permission('manage settings')
-                                                    <form method="POST" action="{{ route('appearance.themes.activate') }}">
-                                                        @csrf
-                                                        <input type="hidden" name="theme" value="{{ $theme['dir'] }}">
-                                                        <button type="submit" class="px-3 py-2 rounded bg-blue-600 text-white text-sm hover:bg-blue-700">Activate</button>
-                                                    </form>
-                                                @else
-                                                    <button type="button" class="px-3 py-2 rounded bg-blue-600 text-white text-sm opacity-60 cursor-not-allowed" disabled>Activate</button>
-                                                @endpermission
-
                                                 @if($active === $theme['dir'])
-                                                    <span class="text-sm text-green-600">Active</span>
+                                                    <span class="px-3 py-2 rounded bg-green-600 text-white text-sm font-semibold">Active</span>
+                                                @else
+                                                    @permission('manage settings')
+                                                        <form method="POST" action="{{ route('appearance.themes.activate') }}">
+                                                            @csrf
+                                                            <input type="hidden" name="theme" value="{{ $theme['dir'] }}">
+                                                            <button type="submit" class="px-3 py-2 rounded bg-blue-600 text-white text-sm hover:bg-blue-700">Activate</button>
+                                                        </form>
+                                                    @else
+                                                        <button type="button" class="px-3 py-2 rounded bg-blue-600 text-white text-sm opacity-60 cursor-not-allowed" disabled>Activate</button>
+                                                    @endpermission
                                                 @endif
                                             </div>
                                         </div>

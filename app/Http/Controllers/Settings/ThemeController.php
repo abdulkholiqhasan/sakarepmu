@@ -112,7 +112,17 @@ class ThemeController extends Controller
         }
 
         // Persist selected theme via SettingsService
-        $this->settings->set(['theme' => $name]);
+        try {
+            $this->settings->set(['theme' => $name]);
+        } catch (\Throwable $e) {
+            return back()->with('error', __('Gagal mengaktifkan theme: ') . $e->getMessage());
+        }
+
+        // Pastikan theme benar-benar aktif di settings
+        $activeTheme = $this->settings->get('theme');
+        if ($activeTheme !== $name) {
+            return back()->with('error', __('Theme gagal diaktifkan. Cek permission file settings atau database.'));
+        }
 
         return redirect()->route('appearance.themes')->with('status', __('Theme activated.'));
     }

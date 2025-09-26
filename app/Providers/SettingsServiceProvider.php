@@ -83,10 +83,16 @@ class SettingsServiceProvider extends ServiceProvider
                     if (is_dir($themeViews)) {
                         // Prepend theme views path so it takes precedence over default resource views
                         $paths = config('view.paths', []);
-                        if (! in_array($themeViews, $paths, true)) {
-                            array_unshift($paths, $themeViews);
-                            config(['view.paths' => $paths]);
-                        }
+                        // Remove theme path if already exists to avoid duplicates
+                        $paths = array_filter($paths, function ($path) use ($themeViews) {
+                            return $path !== $themeViews;
+                        });
+                        // Always prepend active theme path
+                        array_unshift($paths, $themeViews);
+                        config(['view.paths' => $paths]);
+
+                        // Force refresh view finder to use new paths
+                        app('view')->getFinder()->setPaths($paths);
                     }
                 }
             } catch (\Throwable $e) {
