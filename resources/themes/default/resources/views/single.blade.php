@@ -11,7 +11,7 @@
         @endforeach
         &raquo; <span class="text-gray-700">{{ $post->title }}</span>
     </nav>
-    <article class="max-w-2xl mx-auto bg-white rounded shadow p-6">
+    <article class="mx-auto bg-white rounded shadow p-6">
         <h1 class="text-3xl font-bold mb-4">{{ $post->title }}</h1>
         <p class="text-gray-600 text-sm mb-4">{{ $post->created_at->format('d M Y') }} oleh {{ $post->author->name ?? 'Unknown' }}</p>
         <div class="prose max-w-none mb-6">

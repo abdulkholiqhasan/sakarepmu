@@ -1702,6 +1702,9 @@
                     toolbar: {
                         container: toolbarOptions,
                         handlers: {
+                                link: function() {
+                                    // no-op: we handle links with a custom popup to control target attribute
+                                },
                             image: function() {
                                 const input = document.createElement('input');
                                 input.setAttribute('type', 'file');
@@ -2175,20 +2178,22 @@
                         const btnRect = videoBtn.getBoundingClientRect(); 
                         
                         let left, top;
-                        if (window.innerWidth <= 640) {
-                            // Mobile positioning - center popup
-                            left = Math.max(10, (window.innerWidth - 280) / 2);
-                            top = btnRect.bottom + window.scrollY + 10;
-                            
-                            // If too close to bottom, show above
-                            if (top + 200 > window.innerHeight + window.scrollY - 20) {
-                                top = Math.max(20, btnRect.top + window.scrollY - 210);
+                        try{
+                            const desiredWidth = 280;
+                            const width = Math.min(desiredWidth, Math.max(160, window.innerWidth - 20));
+                            vpopup.style.width = width + 'px';
+                            if (window.innerWidth <= 640) {
+                                left = Math.max(10, Math.round((window.innerWidth - width) / 2));
+                                top = btnRect.bottom + window.scrollY + 10;
+                                if (top + 200 > window.innerHeight + window.scrollY - 20) {
+                                    top = Math.max(20, btnRect.top + window.scrollY - 210);
+                                }
+                            } else {
+                                left = Math.max(8, btnRect.left + window.scrollX);
+                                left = Math.min(left, Math.max(8, window.innerWidth - width - 10));
+                                top = btnRect.bottom + window.scrollY + 6;
                             }
-                        } else {
-                            // Desktop positioning
-                            left = Math.max(8, btnRect.left + window.scrollX); 
-                            top = btnRect.bottom + window.scrollY + 6;
-                        }
+                        }catch(e){ left = Math.max(8, btnRect.left + window.scrollX); top = btnRect.bottom + window.scrollY + 6; }
                         
                         vpopup.style.left = left + 'px'; 
                         vpopup.style.top = top + 'px'; 
@@ -2255,20 +2260,22 @@
                         const btnRect = htmlBtn.getBoundingClientRect(); 
                         
                         let left, top;
-                        if (window.innerWidth <= 640) {
-                            // Mobile positioning - center popup
-                            left = Math.max(10, (window.innerWidth - 340) / 2);
-                            top = btnRect.bottom + window.scrollY + 10;
-                            
-                            // If too close to bottom, show above
-                            if (top + 250 > window.innerHeight + window.scrollY - 20) {
-                                top = Math.max(20, btnRect.top + window.scrollY - 260);
+                        try{
+                            const desiredWidth = 340;
+                            const width = Math.min(desiredWidth, Math.max(200, window.innerWidth - 20));
+                            hpopup.style.width = width + 'px';
+                            if (window.innerWidth <= 640) {
+                                left = Math.max(10, Math.round((window.innerWidth - width) / 2));
+                                top = btnRect.bottom + window.scrollY + 10;
+                                if (top + 250 > window.innerHeight + window.scrollY - 20) {
+                                    top = Math.max(20, btnRect.top + window.scrollY - 260);
+                                }
+                            } else {
+                                left = Math.max(8, btnRect.left + window.scrollX);
+                                left = Math.min(left, Math.max(8, window.innerWidth - width - 10));
+                                top = btnRect.bottom + window.scrollY + 6;
                             }
-                        } else {
-                            // Desktop positioning
-                            left = Math.max(8, btnRect.left + window.scrollX); 
-                            top = btnRect.bottom + window.scrollY + 6;
-                        }
+                        }catch(e){ left = Math.max(8, btnRect.left + window.scrollX); top = btnRect.bottom + window.scrollY + 6; }
                         
                         hpopup.style.left = left + 'px'; 
                         hpopup.style.top = top + 'px'; 
@@ -2334,6 +2341,269 @@
                         hpopup.classList.add('hidden'); 
                     }); 
                 }
+                
+                    // Link popup (URL + target) and handlers
+                    let lpopup = document.querySelector('.ql-link-popup[data-editor="' + name + '"]');
+                    if(!lpopup){
+                        lpopup = document.createElement('div');
+                        lpopup.className = 'ql-link-popup hidden p-4 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-lg shadow-lg';
+                        lpopup.setAttribute('data-editor', name);
+                        lpopup.style.minWidth = '320px';
+                        lpopup.style.maxWidth = '420px';
+                        lpopup.style.position = 'absolute';
+                        lpopup.style.zIndex = 9999;
+                        lpopup.innerHTML = `
+                            <div class="flex flex-col space-y-3">
+                                <label class="text-xs font-medium text-gray-700 dark:text-gray-300">URL</label>
+                                <input type="text" class="ql-link-url bg-gray-50 dark:bg-zinc-900 dark:text-white border border-gray-200 dark:border-zinc-600 p-2 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://example.com" />
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex items-center space-x-2">
+                                            <input id="ql-link-newtab-` + name + `" type="checkbox" class="ql-link-newtab text-blue-600 focus:ring-blue-500" />
+                                            <label for="ql-link-newtab-` + name + `" class="text-xs font-medium text-gray-700 dark:text-gray-300">Open in new tab</label>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <input id="ql-link-nofollow-` + name + `" type="checkbox" class="ql-link-nofollow text-blue-600 focus:ring-blue-500" />
+                                            <label for="ql-link-nofollow-` + name + `" class="text-xs font-medium text-gray-700 dark:text-gray-300">nofollow</label>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <input id="ql-link-sponsored-` + name + `" type="checkbox" class="ql-link-sponsored text-blue-600 focus:ring-blue-500" />
+                                            <label for="ql-link-sponsored-` + name + `" class="text-xs font-medium text-gray-700 dark:text-gray-300">sponsored</label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="ql-link-remove px-2 py-1 text-xs rounded text-red-600 dark:text-red-400 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-700">Remove</button>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex justify-end space-x-2">
+                                <button type="button" class="ql-link-cancel px-3 py-2 rounded border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">Cancel</button>
+                                <button type="button" class="ql-link-insert px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors">Insert / Update</button>
+                            </div>
+                        `;
+                        document.body.appendChild(lpopup);
+                    }
+
+                    // Wire up link button from toolbar
+                    const linkBtn = container.querySelector('.ql-link');
+                    function openLinkPopupFor(range, anchorNode){
+                        const urlInput = lpopup.querySelector('.ql-link-url');
+                        const newTabCheckbox = lpopup.querySelector('.ql-link-newtab');
+                        const nofollowCheckbox = lpopup.querySelector('.ql-link-nofollow');
+                        const sponsoredCheckbox = lpopup.querySelector('.ql-link-sponsored');
+                        urlInput.value = anchorNode ? (anchorNode.getAttribute('href') || '') : (range && range.length ? quill.getText(range.index, range.length) : '');
+                        const target = anchorNode ? (anchorNode.getAttribute('target') || '') : '';
+                        newTabCheckbox.checked = (target === '_blank');
+                        // prefill rel checkboxes
+                        if(anchorNode){
+                            const rel = (anchorNode.getAttribute('rel') || '').split(/\s+/);
+                            nofollowCheckbox.checked = rel.indexOf('nofollow') !== -1;
+                            sponsoredCheckbox.checked = rel.indexOf('sponsored') !== -1;
+                        } else {
+                            nofollowCheckbox.checked = false;
+                            sponsoredCheckbox.checked = false;
+                        }
+
+                        const btnRect = (linkBtn && linkBtn.getBoundingClientRect()) || { left: 10, right: 10, bottom: 40, top: 10 };
+                        let left, top;
+                        try{
+                            const desiredWidth = 340;
+                            const width = Math.min(desiredWidth, Math.max(220, window.innerWidth - 20));
+                            lpopup.style.width = width + 'px';
+                            if (window.innerWidth <= 640) {
+                                left = Math.max(10, Math.round((window.innerWidth - width) / 2));
+                                top = btnRect.bottom + window.scrollY + 10;
+                                if (top + 220 > window.innerHeight + window.scrollY - 20) {
+                                    top = Math.max(20, btnRect.top + window.scrollY - 230);
+                                }
+                            } else {
+                                left = Math.max(8, btnRect.left + window.scrollX);
+                                left = Math.min(left, Math.max(8, window.innerWidth - width - 10));
+                                top = btnRect.bottom + window.scrollY + 6;
+                            }
+                        }catch(e){ left = Math.max(8, btnRect.left + window.scrollX); top = btnRect.bottom + window.scrollY + 6; }
+
+                        lpopup.style.left = left + 'px';
+                        lpopup.style.top = top + 'px';
+                        lpopup.classList.remove('hidden');
+
+                        // focus input after visible
+                        setTimeout(function(){ urlInput.focus(); urlInput.select(); }, 80);
+
+                        // attach handlers for insert/update/remove
+                        const insertBtn = lpopup.querySelector('.ql-link-insert');
+                        const cancelBtn = lpopup.querySelector('.ql-link-cancel');
+                        const removeBtn = lpopup.querySelector('.ql-link-remove');
+
+                        function cleanup(){ lpopup.classList.add('hidden'); insertBtn.removeEventListener('click', onInsert); cancelBtn.removeEventListener('click', onCancel); removeBtn.removeEventListener('click', onRemove); }
+
+                        function applyAttributesToAnchor(aNode, url, newTab){
+                            try{
+                                if(url){ aNode.setAttribute('href', url); } else { aNode.removeAttribute('href'); }
+                                // build rel value
+                                let relParts = [];
+                                if(newTab){ aNode.setAttribute('target', '_blank'); relParts.push('noopener', 'noreferrer'); }
+                                else { aNode.removeAttribute('target'); }
+                                try{
+                                    const nofollow = lpopup.querySelector('.ql-link-nofollow').checked;
+                                    const sponsored = lpopup.querySelector('.ql-link-sponsored').checked;
+                                    if(nofollow) relParts.push('nofollow');
+                                    if(sponsored) relParts.push('sponsored');
+                                }catch(e){}
+                                if(relParts.length){ aNode.setAttribute('rel', relParts.join(' ')); } else { aNode.removeAttribute('rel'); }
+                            }catch(e){}
+                        }
+
+                        function onInsert(e){
+                            const url = (lpopup.querySelector('.ql-link-url').value || '').trim();
+                            const newTab = !!lpopup.querySelector('.ql-link-newtab').checked;
+                            if(!url){ alert('Please enter a URL'); return; }
+
+                            if(anchorNode){
+                                // update existing anchor directly
+                                applyAttributesToAnchor(anchorNode, url, newTab);
+                                try{ const blot = Quill.find(anchorNode); if(blot){ const idx = quill.getIndex(blot); quill.formatText(idx, blot.length ? blot.length() : 1, 'link', url, Quill.sources.USER); } }catch(e){}
+                            } else if(range){
+                                // if no selection length, insert the url as text and link it
+                                if(range.length === 0){ quill.insertText(range.index, url, { 'link': url }, Quill.sources.USER); quill.setSelection(range.index + url.length, Quill.sources.SILENT); }
+                                else { quill.formatText(range.index, range.length, 'link', url, Quill.sources.USER); }
+
+                                // try to locate anchor(s) in the editor and set target. Use a small timeout
+                                // because Quill may update the DOM asynchronously.
+                                try{
+                                    const anchors = editorEl.querySelectorAll('a[href]');
+                                    anchors.forEach(function(a){
+                                        try{
+                                            if(a.getAttribute('data-wysiwyg-handled')) return;
+                                            const href = a.getAttribute('href') || '';
+                                            if(href === url || href.endsWith(url)){
+                                                applyAttributesToAnchor(a, url, newTab);
+                                                a.setAttribute('data-wysiwyg-handled', '1');
+                                            }
+                                        }catch(e){}
+                                    });
+                                }catch(e){}
+
+                                // Use a MutationObserver to catch any later changes (other scripts / handlers)
+                                // that might add target="_blank" after insertion. We'll enforce the
+                                // user's choice for a short window.
+                                (function(){
+                                    let handledOnce = false;
+                                    const mo = new MutationObserver(function(mutations){
+                                        try{
+                                            mutations.forEach(function(m){
+                                                if(m.type === 'childList'){
+                                                    Array.from(m.addedNodes || []).forEach(function(node){
+                                                        if(node && node.querySelectorAll){
+                                                            const as = node.querySelectorAll('a[href]');
+                                                            as.forEach(function(a){
+                                                                try{
+                                                                    const href = a.getAttribute('href') || '';
+                                                                    if(href === url || href.endsWith(url)){
+                                                                        applyAttributesToAnchor(a, url, newTab);
+                                                                        a.setAttribute('data-wysiwyg-handled', '1');
+                                                                        handledOnce = true;
+                                                                    }
+                                                                }catch(e){}
+                                                            });
+                                                        }
+                                                        // also if the added node itself is an anchor
+                                                        try{
+                                                            if(node && node.tagName === 'A'){
+                                                                const a = node;
+                                                                const href = a.getAttribute('href') || '';
+                                                                if(href === url || href.endsWith(url)){
+                                                                    applyAttributesToAnchor(a, url, newTab);
+                                                                    a.setAttribute('data-wysiwyg-handled', '1');
+                                                                    handledOnce = true;
+                                                                }
+                                                            }
+                                                        }catch(e){}
+                                                    });
+                                                } else if(m.type === 'attributes' && m.target && m.target.tagName === 'A'){
+                                                    const a = m.target;
+                                                    const href = a.getAttribute('href') || '';
+                                                    if(href === url || href.endsWith(url)){
+                                                        applyAttributesToAnchor(a, url, newTab);
+                                                        a.setAttribute('data-wysiwyg-handled', '1');
+                                                        handledOnce = true;
+                                                    }
+                                                }
+                                            });
+                                        }catch(e){}
+                                    });
+                                    try{
+                                        mo.observe(editorEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['target', 'rel', 'href'] });
+                                    }catch(e){}
+                                    // stop observing after 2s
+                                    setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, 2000);
+                                })();
+                            } else {
+                                // fallback: append link at end
+                                quill.root.insertAdjacentHTML('beforeend', '<a href="' + url + '"' + (newTab ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + url + '</a>');
+                            }
+
+                            cleanup();
+                        }
+
+                        function onRemove(e){
+                            if(anchorNode){
+                                try{ const blot = Quill.find(anchorNode); if(blot){ const idx = quill.getIndex(blot); quill.formatText(idx, blot.length ? blot.length() : 1, 'link', false, Quill.sources.USER); }
+                                    else { // fallback: unwrap anchor node
+                                        const parent = anchorNode.parentNode; while(anchorNode.firstChild) parent.insertBefore(anchorNode.firstChild, anchorNode); parent.removeChild(anchorNode);
+                                    }
+                                }catch(e){}
+                            } else if(range){
+                                try{ quill.formatText(range.index, range.length, 'link', false, Quill.sources.USER); }catch(e){}
+                            }
+                            cleanup();
+                        }
+
+                        function onCancel(){ cleanup(); }
+
+                        insertBtn.addEventListener('click', onInsert);
+                        cancelBtn.addEventListener('click', onCancel);
+                        removeBtn.addEventListener('click', onRemove);
+                    }
+
+                    if(linkBtn){
+                        linkBtn.addEventListener('click', function(e){
+                            e.preventDefault();
+                            // prevent Quill's own toolbar handler from also running
+                            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                            const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+                            // if selection contains a link, prefill and edit it
+                            let anchorNode = null;
+                            try{
+                                if(range && range.length > 0){ const [leaf] = quill.getLeaf(range.index); const node = leaf && leaf.domNode ? leaf.domNode : null; anchorNode = node && node.closest ? node.closest('a') : null; }
+                                else { // caret only: try to find anchor at caret
+                                    const [leaf] = quill.getLeaf(range.index - 1 >= 0 ? range.index - 1 : range.index);
+                                    const node = leaf && leaf.domNode ? leaf.domNode : null; anchorNode = node && node.closest ? node.closest('a') : null;
+                                }
+                            }catch(e){}
+                            openLinkPopupFor(range, anchorNode);
+                        });
+
+                        document.addEventListener('click', function(ev){ if(lpopup.classList.contains('hidden')) return; if(ev.target === linkBtn || lpopup.contains(ev.target) || container.contains(ev.target)) return; lpopup.classList.add('hidden'); });
+                    }
+
+                    // Click-to-edit existing links inside the editor
+                    editorEl.addEventListener('click', function(ev){
+                        // allow ctrl/meta click to follow link normally
+                        if(ev.defaultPrevented) return;
+                        const target = ev.target;
+                        if(target && target.tagName === 'A'){
+                            if(ev.metaKey || ev.ctrlKey) return; // let user follow the link
+                            ev.preventDefault();
+                            // locate blot and range for this anchor
+                            let anchor = target;
+                            try{
+                                const blot = Quill.find(anchor);
+                                if(blot){ const idx = quill.getIndex(blot); const len = blot.length ? blot.length() : 1; openLinkPopupFor({ index: idx, length: len }, anchor); return; }
+                            }catch(e){}
+                            // fallback: attempt to compute range by searching text
+                            const sel = quill.getSelection(true) || { index: 0, length: 0 };
+                            openLinkPopupFor(sel, anchor);
+                        }
+                    }, { passive: false });
 
                 // Sticky toolbar behavior
                 (function(){
@@ -2341,7 +2611,29 @@
                     if(!toolbarNode) return;
                     let spacer = toolbarNode.parentNode.querySelector('.wysiwyg-toolbar-spacer');
                     if(!spacer){ spacer = document.createElement('div'); spacer.className = 'wysiwyg-toolbar-spacer'; toolbarNode.parentNode.insertBefore(spacer, toolbarNode.nextSibling); }
-                    function setStickyState(sticky){ if(sticky){ toolbarNode.classList.add('sticky'); try{ editorEl.style.paddingTop = toolbarNode.offsetHeight + 'px'; }catch(e){} } else { toolbarNode.classList.remove('sticky'); try{ editorEl.style.paddingTop = ''; }catch(e){} } }
+                    function setStickyState(sticky){
+                        try{
+                            const editorRect = editorEl.getBoundingClientRect();
+                            if(sticky){
+                                toolbarNode.classList.add('sticky');
+                                // position and size toolbar to match editor while sticky
+                                toolbarNode.style.left = Math.max(0, editorRect.left + window.scrollX) + 'px';
+                                toolbarNode.style.width = editorRect.width + 'px';
+                                editorEl.style.paddingTop = toolbarNode.offsetHeight + 'px';
+                                // ensure spacer height matches toolbar height
+                                if(spacer) spacer.style.height = toolbarNode.offsetHeight + 'px';
+                            } else {
+                                toolbarNode.classList.remove('sticky');
+                                // clear inline styles so toolbar returns to natural layout
+                                toolbarNode.style.left = '';
+                                toolbarNode.style.width = '';
+                                if(spacer) spacer.style.height = '';
+                                editorEl.style.paddingTop = '';
+                            }
+                        }catch(e){
+                            try{ if(sticky){ toolbarNode.classList.add('sticky'); editorEl.style.paddingTop = toolbarNode.offsetHeight + 'px'; } else { toolbarNode.classList.remove('sticky'); editorEl.style.paddingTop = ''; } }catch(_){}
+                        }
+                    }
                     try { const observer = new IntersectionObserver(function(entries){ entries.forEach(function(entry){ const isAbove = entry.boundingClientRect.top < 0; setStickyState(isAbove); }); }, { threshold: [0] }); observer.observe(toolbarNode); } catch(e){ function fallback(){ const rect = toolbarNode.getBoundingClientRect(); const editorRect = editorEl.getBoundingClientRect(); setStickyState(rect.top < 0 && (editorRect.bottom > 0)); } window.addEventListener('scroll', function(){ window.requestAnimationFrame(fallback); }, { passive: true }); window.addEventListener('resize', fallback); fallback(); }
                     window.addEventListener('resize', function(){ if(toolbarNode.classList.contains('sticky')){ const editorRect = editorEl.getBoundingClientRect(); toolbarNode.style.left = Math.max(0, editorRect.left + window.scrollX) + 'px'; toolbarNode.style.width = editorRect.width + 'px'; spacer.style.height = toolbarNode.offsetHeight + 'px'; } });
                 })();
@@ -2353,21 +2645,27 @@
                     e.preventDefault(); 
                     const btnRect = tableBtn.getBoundingClientRect(); 
                     
-                    let left, top;
-                    if (window.innerWidth <= 640) {
-                        // Mobile positioning - center popup
-                        left = Math.max(10, (window.innerWidth - 220) / 2);
-                        top = btnRect.bottom + window.scrollY + 10;
-                        
-                        // If too close to bottom, show above
-                        if (top + 180 > window.innerHeight + window.scrollY - 20) {
-                            top = Math.max(20, btnRect.top + window.scrollY - 190);
-                        }
-                    } else {
-                        // Desktop positioning
-                        left = Math.max(8, btnRect.left + window.scrollX); 
-                        top = btnRect.bottom + window.scrollY + 6;
-                    }
+                        let left, top;
+                        // Responsive width: prefer popup's designed width but never overflow viewport
+                        try{
+                            const desiredWidth = 220; // nominal popup width
+                            const width = Math.min(desiredWidth, Math.max(120, window.innerWidth - 20));
+                            popup.style.width = width + 'px';
+                            if (window.innerWidth <= 640) {
+                                // Mobile: center the popup and keep some side padding
+                                left = Math.max(10, Math.round((window.innerWidth - width) / 2));
+                                top = btnRect.bottom + window.scrollY + 10;
+                                // If too close to bottom, show above
+                                if (top + 180 > window.innerHeight + window.scrollY - 20) {
+                                    top = Math.max(20, btnRect.top + window.scrollY - 190);
+                                }
+                            } else {
+                                // Desktop: align with button but clamp to viewport
+                                left = Math.max(8, btnRect.left + window.scrollX);
+                                left = Math.min(left, Math.max(8, window.innerWidth - width - 10));
+                                top = btnRect.bottom + window.scrollY + 6;
+                            }
+                        }catch(e){ left = Math.max(8, btnRect.left + window.scrollX); top = btnRect.bottom + window.scrollY + 6; }
                     
                     popup.style.left = left + 'px'; 
                     popup.style.top = top + 'px'; 
