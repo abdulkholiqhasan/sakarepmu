@@ -3,9 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [App\Http\Controllers\Frontend\BlogController::class, 'home'])->name('home');
+
+// Public blog page (frontend, hanya menampilkan posts published)
+Route::get('blog', [App\Http\Controllers\Frontend\BlogController::class, 'index'])->name('blog.index');
+
+// Public single blog post (frontend, hanya menampilkan post published)
+Route::get('blog/{slug}', [App\Http\Controllers\Frontend\BlogController::class, 'show'])->name('blog.show');
+
+// Public single category page (frontend, menampilkan posts published per kategori)
+Route::get('category/{slug}', [App\Http\Controllers\Frontend\BlogController::class, 'category'])->name('category.show');
+
+// Public single tag page (frontend, menampilkan posts published per tag)
+Route::get('tag/{slug}', [App\Http\Controllers\Frontend\BlogController::class, 'tag'])->name('tag.show');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

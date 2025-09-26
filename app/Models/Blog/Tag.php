@@ -55,4 +55,9 @@ class Tag extends Model
 
         return $slug;
     }
+
+    public function posts()
+    {
+        return $this->belongsToMany(Post::class, 'post_tag', 'tag_id', 'post_id');
+    }
 }
