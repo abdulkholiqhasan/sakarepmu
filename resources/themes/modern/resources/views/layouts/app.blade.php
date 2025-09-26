@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', \App\Models\Setting::where('key', 'site_title')->value('value') ?? config('settings.site_title', 'Blog')) - MODERN THEME</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="stylesheet" href="{{ asset('css/wysiwyg-post.css') }}">
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     <nav class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg mb-8">

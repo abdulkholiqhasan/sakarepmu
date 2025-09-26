@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', \App\Models\Setting::where('key', 'site_title')->value('value') ?? config('settings.site_title', 'Blog'))</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="stylesheet" href="{{ asset('css/wysiwyg-post.css') }}">
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen theme-default">
     <nav class="bg-white shadow mb-8">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="/" class="text-xl font-bold text-gray-800">{{ \App\Models\Setting::where('key', 'site_title')->value('value') ?? config('settings.site_title', 'Sakarepku') }}</a>
