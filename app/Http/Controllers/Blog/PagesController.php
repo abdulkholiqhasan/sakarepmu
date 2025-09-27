@@ -139,18 +139,22 @@ class PagesController extends Controller
             'featured_image_file' => 'nullable|file|image|max:5120',
         ]);
 
-        // Handle action buttons on update: publish, revert/draft, or normal update
+        // Handle action buttons on update: 'update' (save & publish), 'publish', 'revert' (revert to draft), or normal update
         $action = $request->input('action');
-        if ($action === 'publish') {
+
+        if ($action === 'publish' || $action === 'update') {
+            // Treat both explicit publish and the "Update & Publish" button as publishing the page
             $data['published'] = true;
             if (empty($data['published_at'])) {
                 $data['published_at'] = now();
             }
         } elseif ($action === 'revert' || $action === 'draft') {
+            // revert to draft
             $data['published'] = false;
             $data['published_at'] = null;
         } else {
             $data['published'] = isset($data['published']) ? (bool) $data['published'] : false;
+            // If user did not provide a published_at value in the update payload, keep existing published_at
             if (!$request->filled('published_at') && array_key_exists('published_at', $data)) {
                 unset($data['published_at']);
             }

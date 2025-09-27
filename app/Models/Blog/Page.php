@@ -4,6 +4,7 @@ namespace App\Models\Blog;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 class Page extends Model
 {
@@ -16,6 +17,7 @@ class Page extends Model
         'title',
         'slug',
         'content',
+        'author_id',
         'published',
         'published_at',
         'modified_at',
@@ -25,6 +27,7 @@ class Page extends Model
         'published' => 'boolean',
         'published_at' => 'datetime',
         'modified_at' => 'datetime',
+        'author_id' => 'string',
     ];
 
     protected static function booted()
@@ -56,5 +59,10 @@ class Page extends Model
             $slug = $base . '-' . $i++;
         }
         return $slug;
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'author_id');
     }
 }
