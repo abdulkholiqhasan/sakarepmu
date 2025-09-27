@@ -121,7 +121,7 @@
                             <input 
                                 name="published_at" 
                                 type="datetime-local" 
-                                value="{{ old('published_at', isset($post) && $post->published_at ? $post->published_at->format('Y-m-d\TH:i') : '') }}" 
+                                value="{{ old('published_at') ? \Carbon\Carbon::parse(old('published_at'))->format('Y-m-d\\TH:i') : (isset($post) && $post->published_at ? $post->published_at->format('Y-m-d\\TH:i') : '') }}" 
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
                             />
                             @error('published_at') 
@@ -312,6 +312,36 @@
                 slug.focus();
             });
         }
+    })();
+</script>
+
+<script>
+    // Convert local datetime-local to UTC ISO before submit (for edit form)
+    (function ensurePublishedAtUtcOnSubmit(){
+        const form = document.querySelector('form');
+        if(!form) return;
+        form.addEventListener('submit', function(e){
+            const dtLocal = form.querySelector('input[type="datetime-local"][name="published_at"]');
+            if(!dtLocal || !dtLocal.value) return;
+
+            const [datePart, timePart] = dtLocal.value.split('T');
+            if(!datePart || !timePart) return;
+            const [y, m, d] = datePart.split('-').map(Number);
+            const [hh, mm] = timePart.split(':').map(Number);
+            const localDate = new Date(y, (m||1)-1, d, hh||0, mm||0, 0, 0);
+            const isoUtc = localDate.toISOString();
+
+            dtLocal.removeAttribute('name');
+            let hidden = document.getElementById('published_at_utc_input');
+            if(!hidden){
+                hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.id = 'published_at_utc_input';
+                hidden.name = 'published_at';
+                form.appendChild(hidden);
+            }
+            hidden.value = isoUtc;
+        });
     })();
 </script>
 

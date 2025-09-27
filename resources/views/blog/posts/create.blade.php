@@ -130,7 +130,7 @@
                                 name="published_at" 
                                 id="published_at"
                                 type="datetime-local" 
-                                value="{{ old('published_at', now()->format('Y-m-d\TH:i')) }}" 
+                                value="{{ old('published_at') ? \Carbon\Carbon::parse(old('published_at'))->format('Y-m-d\\TH:i') : now()->format('Y-m-d\\TH:i') }}" 
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
                             />
                             @error('published_at') 
@@ -634,4 +634,40 @@
         const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
         document.getElementById('published_at').value = currentDateTime;
     }
+
+    // Ensure published_at from the user's local time is converted to an unambiguous UTC ISO
+    // before the form is submitted. This prevents server-side parsing from interpreting
+    // the local-only datetime-local value in a different timezone.
+    (function ensurePublishedAtUtcOnSubmit(){
+        const form = document.querySelector('form');
+        if(!form) return;
+        form.addEventListener('submit', function(e){
+            const dtLocal = form.querySelector('input[type="datetime-local"][name="published_at"]');
+            if(!dtLocal || !dtLocal.value) return;
+
+            // Parse local components safely (avoid Date parsing quirks)
+            const [datePart, timePart] = dtLocal.value.split('T');
+            if(!datePart || !timePart) return;
+            const [y, m, d] = datePart.split('-').map(Number);
+            const [hh, mm] = timePart.split(':').map(Number);
+
+            // Create Date as local time and convert to UTC ISO string
+            const localDate = new Date(y, (m||1)-1, d, hh||0, mm||0, 0, 0);
+            const isoUtc = localDate.toISOString(); // e.g. 2025-09-27T07:30:00.000Z
+
+            // Remove name from visible datetime-local input so it won't be submitted
+            dtLocal.removeAttribute('name');
+
+            // Attach or update hidden input that carries the UTC ISO timestamp
+            let hidden = document.getElementById('published_at_utc_input');
+            if(!hidden){
+                hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.id = 'published_at_utc_input';
+                hidden.name = 'published_at';
+                form.appendChild(hidden);
+            }
+            hidden.value = isoUtc;
+        });
+    })();
 </script>
