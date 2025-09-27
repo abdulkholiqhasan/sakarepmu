@@ -2376,6 +2376,105 @@
                     vpopup.querySelector('.ql-video-cancel').addEventListener('click', function(){ vpopup.classList.add('hidden'); });
                 }
 
+                // Image by URL button & popup
+                if(!container.querySelector('.ql-image-url')){
+                    const ibtn = document.createElement('button');
+                    ibtn.type = 'button';
+                    ibtn.className = 'ql-image-url';
+                    ibtn.setAttribute('title', 'Insert image by URL');
+                    ibtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect class="ql-stroke" x="3" y="3" width="18" height="18" rx="2" ry="2"/><path class="ql-stroke" d="M21 15l-5-5-4 4-3-3-4 4"/></svg>';
+                    const imageBtn = container.querySelector('.ql-image');
+                    if(imageBtn && imageBtn.parentNode) imageBtn.parentNode.insertBefore(ibtn, imageBtn.nextSibling);
+                    else (container.querySelector('.ql-formats')||container).appendChild(ibtn);
+                }
+
+                let ipopup = document.querySelector('.ql-image-url-popup[data-editor="' + name + '"]');
+                if(!ipopup){
+                    ipopup = document.createElement('div');
+                    ipopup.className = 'ql-image-url-popup hidden p-4 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-lg shadow-lg';
+                    ipopup.setAttribute('data-editor', name);
+                    ipopup.style.minWidth = '280px';
+                    ipopup.style.maxWidth = '480px';
+                    ipopup.style.position = 'absolute';
+                    ipopup.style.zIndex = 9999;
+                    ipopup.innerHTML = `
+                        <div class="flex flex-col space-y-3">
+                            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Image URL</label>
+                            <input type="text" class="ql-image-url-input bg-gray-50 dark:bg-zinc-900 dark:text-white border border-gray-200 dark:border-zinc-600 p-2 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://example.com/image.jpg" />
+                            <div class="text-xs text-gray-500 dark:text-gray-400">You can paste an absolute URL (https) or a data URL. If you omit the protocol, https:// will be prepended.</div>
+                        </div>
+                        <div class="mt-4 flex justify-end space-x-2">
+                            <button type="button" class="ql-image-url-cancel px-3 py-2 rounded border border-gray-300 dark:border-zinc-600 text-gray-700 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">Cancel</button>
+                            <button type="button" class="ql-image-url-insert px-3 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm transition-colors">Insert</button>
+                        </div>
+                    `;
+                    document.body.appendChild(ipopup);
+                }
+
+                const imageUrlBtn = container.querySelector('.ql-image-url');
+                if(imageUrlBtn){
+                    imageUrlBtn.addEventListener('click', function(e){
+                        e.preventDefault();
+                        const btnRect = imageUrlBtn.getBoundingClientRect();
+                        let left, top;
+                        try{
+                            const desiredWidth = 320;
+                            const width = Math.min(desiredWidth, Math.max(220, window.innerWidth - 20));
+                            ipopup.style.width = width + 'px';
+                            if (window.innerWidth <= 640) {
+                                left = Math.max(10, Math.round((window.innerWidth - width) / 2));
+                                top = btnRect.bottom + window.scrollY + 10;
+                                if (top + 220 > window.innerHeight + window.scrollY - 20) {
+                                    top = Math.max(20, btnRect.top + window.scrollY - 230);
+                                }
+                            } else {
+                                left = Math.max(8, btnRect.left + window.scrollX);
+                                left = Math.min(left, Math.max(8, window.innerWidth - width - 10));
+                                top = btnRect.bottom + window.scrollY + 6;
+                            }
+                        }catch(e){ left = Math.max(8, btnRect.left + window.scrollX); top = btnRect.bottom + window.scrollY + 6; }
+
+                        ipopup.style.left = left + 'px';
+                        ipopup.style.top = top + 'px';
+                        ipopup.classList.toggle('hidden');
+
+                        setTimeout(() => {
+                            const input = ipopup.querySelector('.ql-image-url-input'); if(input) { input.focus(); input.select(); }
+                        }, 80);
+                    });
+
+                    document.addEventListener('click', function(ev){ if(ipopup.classList.contains('hidden')) return; if(ev.target === imageUrlBtn || ipopup.contains(ev.target) || container.contains(ev.target)) return; ipopup.classList.add('hidden'); });
+
+                    ipopup.querySelector('.ql-image-url-insert').addEventListener('click', function(){
+                        const input = ipopup.querySelector('.ql-image-url-input'); if(!input) return; let url = (input.value || '').trim(); if(!url) return;
+
+                        // simple normalization: if no protocol and not data:, prepend https://
+                        if(!/^(https?:\/\/|data:image\/)/i.test(url)){
+                            url = 'https://' + url;
+                        }
+
+                        const range = quill.getSelection(true) || { index: quill.getLength() };
+                        try{
+                            if(window.__quill_figureBlot_registered){
+                                const value = { src: url, caption: '' };
+                                quill.insertEmbed(range.index, 'figureBlot', value, Quill.sources.USER);
+                                quill.insertText(range.index + 1, '\n', Quill.sources.SILENT);
+                                quill.setSelection(range.index + 2, Quill.sources.SILENT);
+                            } else {
+                                quill.insertEmbed(range.index, 'image', url, Quill.sources.USER);
+                                quill.insertText(range.index + 1, '\n', Quill.sources.SILENT);
+                                quill.setSelection(range.index + 2, Quill.sources.SILENT);
+                            }
+                        }catch(e){
+                            try{ quill.insertEmbed(range.index, 'image', url); quill.insertText(range.index + 1, '\n'); }catch(_){ quill.root.insertAdjacentHTML('beforeend', '<img src="'+url+'" alt=""/>'); }
+                        }
+
+                        ipopup.classList.add('hidden');
+                    });
+
+                    ipopup.querySelector('.ql-image-url-cancel').addEventListener('click', function(){ ipopup.classList.add('hidden'); });
+                }
+
                 // HTML button & popup
                 if(!container.querySelector('.ql-html')){ 
                     const hbtn = document.createElement('button'); 
