@@ -952,6 +952,19 @@
             .wysiwyg-component .ql-editor img:hover {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             }
+
+            /* Figure container for image + caption */
+            .wysiwyg-component .ql-editor figure.ql-figure {
+                margin: 0.5rem 0;
+                display: block;
+                text-align: center;
+            }
+
+            .wysiwyg-component .ql-editor figure.ql-figure img {
+                display: block;
+                margin: 0 auto;
+                border-radius: 4px;
+            }
             
             .wysiwyg-component .ql-editor .ql-align-center img,
             .wysiwyg-component .ql-editor p.ql-align-center img {
@@ -996,6 +1009,43 @@
                     margin-left: auto;
                     margin-right: auto;
                 }
+            }
+
+            /* Image caption styling */
+            .wysiwyg-component .ql-editor .ql-image-caption {
+                display: block;
+                text-align: center;
+                font-size: 0.95rem;
+                color: #4b5563; /* gray-600 */
+                margin-top: 0.25rem;
+                margin-bottom: 0.75rem;
+                line-height: 1.3;
+                padding: 2px 6px;
+                border-radius: 6px;
+                background: transparent;
+                transition: background 0.12s ease, box-shadow 0.12s ease;
+                outline: none;
+                min-height: 20px;
+            }
+
+            /* captions have no placeholder pseudo-element */
+
+            /* Focused caption styling to make it obvious it's editable */
+            .wysiwyg-component .ql-editor .ql-image-caption:focus {
+                background: rgba(59,130,246,0.06);
+                box-shadow: 0 0 0 2px rgba(59,130,246,0.12);
+                color: #0f172a; /* dark text while editing */
+            }
+
+            /* Dark mode caption */
+            .dark .wysiwyg-component .ql-editor .ql-image-caption {
+                color: rgba(203, 213, 225, 0.95); /* light-ish gray for dark bg */
+            }
+
+            .dark .wysiwyg-component .ql-editor .ql-image-caption:focus {
+                background: rgba(59,130,246,0.06);
+                box-shadow: 0 0 0 2px rgba(59,130,246,0.14);
+                color: white;
             }
             
             /* Dark mode styling (class-based) */
@@ -1748,14 +1798,43 @@
                                                     }
                                                 }
                                                 
-                                                // Insert the image
-                                                this.quill.insertEmbed(range.index, 'image', result.url);
-                                                
-                                                // Add line break after image for better editing experience
-                                                this.quill.insertText(range.index + 1, '\n');
-                                                
-                                                // Set selection to the line with the image for alignment
-                                                this.quill.setSelection(range.index, 0);
+                                                // Insert a FigureBlot (image + figcaption) so caption is tied to image
+                                                try {
+                                                    const figureValue = { src: result.url, caption: '' };
+                                                    if (window.__quill_figureBlot_registered) {
+                                                        this.quill.insertEmbed(range.index, 'figureBlot', figureValue, Quill.sources.USER);
+                                                        this.quill.insertText(range.index + 1, '\n', Quill.sources.SILENT);
+                                                        setTimeout(() => {
+                                                            try {
+                                                                const container = this.quill.root;
+                                                                const figs = container.querySelectorAll('figure');
+                                                                let targetFig = null;
+                                                                for (let i = 0; i < figs.length; i++) {
+                                                                    try { if (figs[i].querySelector('img') && figs[i].querySelector('img').getAttribute('src') === result.url) { targetFig = figs[i]; break; } } catch(e){}
+                                                                }
+                                                                if (targetFig) {
+                                                                    const cap = targetFig.querySelector('figcaption');
+                                                                    if (cap) {
+                                                                        try {
+                                                                            const blot = Quill.find(targetFig.closest('.ql-figure-embed'));
+                                                                            if (blot) {
+                                                                                const pos = this.quill.getIndex(blot);
+                                                                                this.quill.setSelection(pos + 1, 0, Quill.sources.SILENT);
+                                                                            }
+                                                                        } catch(e){ try{ this.quill.setSelection(range.index + 2, 0, Quill.sources.SILENT); }catch(_){} }
+                                                                        if (cap && cap.focus) cap.focus();
+                                                                    }
+                                                                }
+                                                            } catch(e){}
+                                                        }, 50);
+                                                    } else {
+                                                        // fallback to previous simple insertion
+                                                        this.quill.insertEmbed(range.index, 'image', result.url);
+                                                        this.quill.insertText(range.index + 1, '\n');
+                                                    }
+                                                } catch(e) {
+                                                    try { this.quill.insertEmbed(range.index, 'image', result.url); this.quill.insertText(range.index + 1, '\n'); } catch(_){}
+                                                }
                                             } else {
                                                 // Remove loading text and show error
                                                 this.quill.deleteText(range.index, '[Uploading image...]'.length);
@@ -1799,6 +1878,31 @@
                 }
             });
             editorEl.__quill = quill;
+            // Make clicking a figure focus its figcaption for easier caption editing
+            try {
+                editorEl.addEventListener('click', function(ev){
+                    try{
+                        const target = ev.target;
+                        const fig = target.closest ? target.closest('figure') : null;
+                        if(fig){
+                            const cap = fig.querySelector('figcaption.ql-image-caption');
+                            if(cap){
+                                // place caret at end of caption
+                                cap.focus();
+                                // move selection inside the editor near the caption so Quill updates properly
+                                try{
+                                    const blot = Quill.find(fig.closest('.ql-figure-embed'));
+                                    if(blot){
+                                        const pos = quill.getIndex(blot);
+                                        quill.setSelection(pos + 1, 0, Quill.sources.SILENT);
+                                    }
+                                }catch(e){}
+                                ev.preventDefault();
+                            }
+                        }
+                    }catch(e){}
+                }, { passive: false });
+            } catch(e){}
             
             // Color picker enhancement
             setTimeout(function() {
@@ -2026,19 +2130,68 @@
                 });
             }, 100);
 
-            // Register TableBlot (embed raw table HTML) once
+            // Register FigureBlot (image + figcaption) and TableBlot once
             try {
                 const BlockEmbed = Quill.import && Quill.import('blots/block/embed');
-                if(BlockEmbed && !window.__quill_tableBlot_registered){
+
+                // FigureBlot: wraps <figure><img/><figcaption/></figure> as a single embed
+                try {
+                    if (BlockEmbed && !window.__quill_figureBlot_registered) {
+                        class FigureBlot extends BlockEmbed {
+                            static create(value) {
+                                const node = super.create();
+                                const src = (value && value.src) ? value.src : (value || '');
+                                const caption = (value && value.caption) ? value.caption : '';
+                                const figure = document.createElement('figure');
+                                figure.className = 'ql-figure';
+                                const img = document.createElement('img');
+                                img.setAttribute('src', src);
+                                img.setAttribute('alt', caption || '');
+                                img.style.display = 'block';
+                                img.style.maxWidth = '100%';
+                                img.style.height = 'auto';
+                                const figcaption = document.createElement('figcaption');
+                                figcaption.className = 'ql-image-caption';
+                                // Make caption editable and accessible
+                                figcaption.contentEditable = 'true';
+                                figcaption.setAttribute('role', 'textbox');
+                                figcaption.setAttribute('aria-multiline', 'false');
+                                if (caption) figcaption.textContent = caption; else figcaption.innerHTML = '<br>';
+                                figure.appendChild(img);
+                                figure.appendChild(figcaption);
+                                node.appendChild(figure);
+                                node.setAttribute('data-figure-src', src);
+                                return node;
+                            }
+
+                            static value(node) {
+                                try {
+                                    const figure = node.querySelector('figure');
+                                    const img = figure ? figure.querySelector('img') : null;
+                                    const figcaption = figure ? figure.querySelector('figcaption') : null;
+                                    return { src: img ? img.getAttribute('src') : '', caption: figcaption ? figcaption.innerText : '' };
+                                } catch (e) { return node.getAttribute('data-figure-src') || ''; }
+                            }
+                        }
+                        FigureBlot.blotName = 'figureBlot';
+                        FigureBlot.tagName = 'div';
+                        FigureBlot.className = 'ql-figure-embed';
+                        Quill.register(FigureBlot);
+                        window.__quill_figureBlot_registered = true;
+                    }
+                } catch (e) { /* ignore figure registration errors */ }
+
+                // TableBlot: existing behavior
+                if (BlockEmbed && !window.__quill_tableBlot_registered) {
                     class TableBlot extends BlockEmbed {
-                        static create(value){
+                        static create(value) {
                             const node = super.create();
                             node.innerHTML = value;
                             node.setAttribute('data-table-embed', 'true');
                             node.contentEditable = true;
                             return node;
                         }
-                        static value(node){ return node.innerHTML; }
+                        static value(node) { return node.innerHTML; }
                     }
                     TableBlot.blotName = 'tableBlot';
                     TableBlot.tagName = 'div';
@@ -2046,7 +2199,7 @@
                     Quill.register(TableBlot);
                     window.__quill_tableBlot_registered = true;
                 }
-            } catch(e){ /* ignore */ }
+            } catch (e) { /* ignore */ }
 
             // Register FormulaBlot for KaTeX math formulas
             try {
@@ -2690,11 +2843,27 @@
             // Enter handling inside blockquote
             (function(){ let lastEnterAt = 0; quill.keyboard.addBinding({ key: 13 }, function(range, context) { const formats = quill.getFormat(range); if (!formats.blockquote) return true; const [line] = quill.getLine(range.index); const lineText = (line && line.domNode) ? line.domNode.innerText : ''; const now = Date.now(); const withinDoubleEnterMs = 800; if (lineText.trim() === '' && (now - lastEnterAt) < withinDoubleEnterMs) { quill.formatLine(range.index, 1, 'blockquote', false); setTimeout(() => quill.setSelection(range.index, 0, Quill.sources.SILENT), 0); lastEnterAt = 0; return false; } quill.insertText(range.index, '\n', Quill.sources.USER); quill.setSelection(range.index + 1, Quill.sources.SILENT); lastEnterAt = now; return false; }); })();
 
-            // initial contents from hidden
-            try { let initial = hidden.value || ''; if(initial){ initial = initial.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>'); quill.root.innerHTML = initial; } } catch(e){}
+            // helper to remove any lingering data-placeholder attributes
+            function _sanitizePlaceholders(html){
+                try{
+                    return html.replace(/\sdata-placeholder=(?:\"[^\"]*\"|'[^']*')/gi, '');
+                }catch(e){ return html; }
+            }
 
-            const form = editorEl.closest('form'); if(form){ form.addEventListener('submit', function(){ let html = quill.root.innerHTML || ''; html = html.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>'); hidden.value = html; }); }
-            quill.on('text-change', function(){ let html = quill.root.innerHTML || ''; html = html.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>'); hidden.value = html; });
+            // initial contents from hidden (sanitize any old placeholders)
+            try {
+                let initial = hidden.value || '';
+                if(initial){
+                    initial = initial.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>');
+                    initial = _sanitizePlaceholders(initial);
+                    quill.root.innerHTML = initial;
+                    // ensure any leftover attributes on DOM nodes are removed
+                    try{ quill.root.querySelectorAll('[data-placeholder]').forEach(function(n){ n.removeAttribute('data-placeholder'); }); }catch(e){}
+                }
+            } catch(e){}
+
+            const form = editorEl.closest('form'); if(form){ form.addEventListener('submit', function(){ let html = quill.root.innerHTML || ''; html = html.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>'); html = _sanitizePlaceholders(html); hidden.value = html; }); }
+            quill.on('text-change', function(){ let html = quill.root.innerHTML || ''; html = html.replace(/<h1(.*?)>([\s\S]*?)<\/h1>/gi, '<h2$1>$2<\/h2>'); html = _sanitizePlaceholders(html); hidden.value = html; });
         }
 
         function initAll(){

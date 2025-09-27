@@ -142,6 +142,74 @@
         0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* Figure + caption styling */
+.prose figure {
+    margin: 1.25em 0;
+    display: block;
+    text-align: center;
+}
+
+.prose figure img {
+    margin: 0 auto;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+.prose figure figcaption {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: #6b7280; /* gray-500 */
+    line-height: 1.25;
+    font-style: italic; /* ensure caption is italic */
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: transparent;
+}
+
+/* captions have no placeholder pseudo-element */
+
+/* Compatibility: some editors output <p class="ql-image-caption"> instead of figcaption */
+.prose .ql-image-caption {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: #6b7280;
+    line-height: 1.25;
+    font-style: italic; /* enforce italic for ql-image-caption */
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: transparent;
+}
+
+/* captions have no placeholder pseudo-element */
+
+/* Make captions slightly more prominent on hover/focus for readability */
+.prose figure:hover figcaption,
+.prose figure:focus-within figcaption {
+    background: rgba(59, 130, 246, 0.04);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.04);
+    color: #374151;
+}
+
+/* Ensure alignment helpers affect figures */
+.prose .ql-align-center figure,
+.prose p.ql-align-center figure {
+    text-align: center;
+}
+
+.prose .ql-align-right figure,
+.prose p.ql-align-right figure {
+    text-align: right;
+}
+
+.prose .ql-align-left figure,
+.prose p.ql-align-left figure {
+    text-align: left;
+}
+
 /* Image alignment classes dari WYSIWYG */
 .prose .ql-align-center,
 .prose p.ql-align-center {
