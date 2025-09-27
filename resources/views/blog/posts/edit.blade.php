@@ -117,9 +117,19 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Published on</label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-sm text-gray-600 dark:text-zinc-400">Published on</label>
+                                <button 
+                                    type="button" 
+                                    onclick="resetPublishDateToNow()"
+                                    class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                                >
+                                    Reset to now
+                                </button>
+                            </div>
                             <input 
                                 name="published_at" 
+                                id="published_at"
                                 type="datetime-local" 
                                 value="{{ old('published_at') ? \Carbon\Carbon::parse(old('published_at'))->format('Y-m-d\\TH:i') : (isset($post) && $post->published_at ? $post->published_at->format('Y-m-d\\TH:i') : '') }}" 
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-zinc-700 rounded text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 touch-manipulation bg-white dark:bg-zinc-900 text-gray-900 dark:text-white"
@@ -315,6 +325,22 @@
     })();
 </script>
 
+<script>
+    // Function to reset publish date to current time (global scope)
+    function resetPublishDateToNow() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const currentDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+        const el = document.getElementById('published_at');
+        if(el) el.value = currentDateTime;
+    }
+
+</script>
 <script>
     // Convert local datetime-local to UTC ISO before submit (for edit form)
     (function ensurePublishedAtUtcOnSubmit(){
