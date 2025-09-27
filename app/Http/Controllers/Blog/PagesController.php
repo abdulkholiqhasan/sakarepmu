@@ -31,13 +31,7 @@ class PagesController extends Controller
             ->when($status === 'published', fn($qB) => $qB->where('published', true))
             ->when($status === 'draft', fn($qB) => $qB->where('published', false))
             ->with(['author'])
-            ->orderByRaw("(CASE
-                WHEN published_at IS NULL AND modified_at IS NULL THEN created_at
-                WHEN published_at IS NULL THEN modified_at
-                WHEN modified_at IS NULL THEN published_at
-                WHEN published_at > modified_at THEN published_at
-                ELSE modified_at
-            END) DESC")
+            ->orderByRaw('COALESCE(published_at, created_at) DESC')
             ->paginate(10);
 
         return view('blog.pages.index', compact('pages'));
