@@ -15,7 +15,7 @@
                     <h2 class="text-xl font-semibold mb-2">
                         <a href="{{ route('blog.show', $post->slug) }}" class="hover:underline">{{ $post->title }}</a>
                     </h2>
-                    <p class="text-gray-600 text-sm mb-2">{{ $post->created_at->format('d M Y') }} oleh {{ $post->author->name ?? 'Unknown' }}</p>
+                    <p class="text-gray-600 text-sm mb-2">{{ ($post->published_at ?? $post->updated_at ?? $post->created_at)->format('d M Y') }} oleh {{ $post->author->name ?? 'Unknown' }}</p>
                     <p class="mb-3">{{ $post->excerpt ?? Str::limit(strip_tags($post->content), 120) }}</p>
                     <a href="{{ route('blog.show', $post->slug) }}" class="text-blue-600 hover:underline">Baca selengkapnya</a>
                 </div>

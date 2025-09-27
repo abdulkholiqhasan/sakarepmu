@@ -25,7 +25,7 @@
                     <h2 class="text-xl font-bold mb-2 text-gray-800">
                         <a href="{{ route('blog.show', $post->slug) }}" class="hover:text-blue-600 transition-colors">{{ $post->title }}</a>
                     </h2>
-                    <p class="text-blue-600 text-sm mb-2 font-medium">📅 {{ $post->created_at->format('d M Y') }} by {{ $post->author->name ?? 'Unknown' }}</p>
+                    <p class="text-blue-600 text-sm mb-2 font-medium">📅 {{ ($post->published_at ?? $post->updated_at ?? $post->created_at)->format('d M Y') }} by {{ $post->author->name ?? 'Unknown' }}</p>
                     <p class="mb-4 text-gray-700 leading-relaxed">{{ $post->excerpt ?? Str::limit(strip_tags($post->content), 120) }}</p>
                     <a href="{{ route('blog.show', $post->slug) }}" class="mt-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium text-center">✨ Baca selengkapnya</a>
                 </div>
