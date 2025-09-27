@@ -207,3 +207,10 @@ Route::get('/email/check', function (\Illuminate\Http\Request $request) {
 
     return response()->json(['status' => $status, 'suggestions' => []]);
 });
+
+// Public single page by slug (frontend static pages)
+// Placed after other named routes so it doesn't accidentally override them.
+// Constrain to avoid catching top-level application routes like 'blog', 'category', etc.
+Route::get('{slug}', [App\Http\Controllers\Frontend\PageController::class, 'show'])
+    ->where('slug', '^(?!blog$|category$|tag$|settings$|manage$|dashboard$|api$|username$|email$).+$')
+    ->name('page.show');
