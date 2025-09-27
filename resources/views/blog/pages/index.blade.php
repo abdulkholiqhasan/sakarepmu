@@ -122,7 +122,10 @@
                                         Author
                                     </th>
                                     <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-zinc-300 uppercase tracking-wider">
-                                        Date
+                                        Published
+                                    </th>
+                                    <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-zinc-300 uppercase tracking-wider">
+                                        Modified
                                     </th>
                                     <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-zinc-300 uppercase tracking-wider">
                                         Actions
@@ -173,8 +176,14 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-500 dark:text-zinc-400">
-                                                <p class="font-medium">{{ $page->created_at->format('M d, Y') }}</p>
-                                                <p class="text-xs">{{ $page->created_at->format('g:i A') }}</p>
+                                                <p class="font-medium">{{ $page->published_at ? $page->published_at->format('M d, Y') : '—' }}</p>
+                                                <p class="text-xs">{{ $page->published_at ? $page->published_at->format('g:i A') : '' }}</p>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm text-gray-500 dark:text-zinc-400">
+                                                <p class="font-medium">{{ $page->updated_at->format('M d, Y') }}</p>
+                                                <p class="text-xs">{{ $page->updated_at->format('g:i A') }}</p>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
