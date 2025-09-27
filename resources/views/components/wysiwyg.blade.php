@@ -1,7 +1,7 @@
 @props(['name' => 'content', 'value' => ''])
 
 <div class="wysiwyg-component">
-    <input type="hidden" name="{{ $name }}" id="{{ $name }}-hidden" value="{!! htmlentities($value) !!}" />
+    <textarea name="{{ $name }}" id="{{ $name }}-hidden" style="display:none;">{!! $value !!}</textarea>
     <div id="{{ $name }}-editor" class="min-h-[200px] sm:min-h-[300px] bg-white dark:bg-zinc-900 rounded border dark:border-zinc-700 p-3">
         {!! $value !!}
     </div>
@@ -2235,6 +2235,47 @@
                     window.__quill_formulaBlot_registered = true;
                 }
             } catch(e){ /* ignore */ }
+
+            // Ensure HTML and Video blots are registered early so existing saved
+            // iframe/html embeds are recognized when we set quill.root.innerHTML
+            try {
+                const BlockEmbed = Quill.import && Quill.import('blots/block/embed');
+                if (BlockEmbed && !window.__quill_htmlBlot_registered) {
+                    class HtmlBlot extends BlockEmbed {
+                        static create(value) {
+                            const node = super.create();
+                            node.innerHTML = value;
+                            node.setAttribute('data-html-embed', 'true');
+                            node.contentEditable = false;
+                            return node;
+                        }
+                        static value(node) { return node.innerHTML; }
+                    }
+                    HtmlBlot.blotName = 'htmlBlot';
+                    HtmlBlot.tagName = 'div';
+                    HtmlBlot.className = 'ql-html-embed';
+                    Quill.register(HtmlBlot);
+                    window.__quill_htmlBlot_registered = true;
+                }
+
+                if (BlockEmbed && !window.__quill_videoBlot_registered) {
+                    class VideoBlot extends BlockEmbed {
+                        static create(value) {
+                            const node = super.create();
+                            node.innerHTML = value;
+                            node.setAttribute('data-video-embed', 'true');
+                            node.contentEditable = false;
+                            return node;
+                        }
+                        static value(node) { return node.innerHTML; }
+                    }
+                    VideoBlot.blotName = 'videoBlot';
+                    VideoBlot.tagName = 'div';
+                    VideoBlot.className = 'ql-video-embed';
+                    Quill.register(VideoBlot);
+                    window.__quill_videoBlot_registered = true;
+                }
+            } catch(e) { /* ignore */ }
 
             // --- Add toolbar custom buttons and popups (table, video, html) ---
             (function(){
