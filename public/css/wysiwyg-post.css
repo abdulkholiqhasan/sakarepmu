@@ -665,22 +665,89 @@
             0 2px 4px -1px rgba(0, 0, 0, 0.2);
     }
 
-    /* Responsive iframe for WYSIWYG post */
-    .prose iframe {
-        display: block;
-        max-width: 100%;
-        width: 100%;
-        min-height: 300px;
-        border: none;
-        margin: 1.5em 0;
-        border-radius: 0.5rem;
-        background: #000;
+    /* Responsive embeds (iframe, embed, video) - centered and larger */
+    .prose iframe,
+    .prose embed,
+    .prose video,
+    .prose .ql-video {
+        display: block !important;
+        margin: 1.75em auto !important; /* center horizontally */
+        width: min(
+            1100px,
+            90%
+        ) !important; /* larger max size but still responsive */
+        max-width: 100% !important;
+        aspect-ratio: 16/9; /* preserve common video ratio */
+        height: auto !important;
+        border: none !important;
+        border-radius: 0.5rem !important;
+        background: #000 !important;
+        box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    /* More specific wrappers used by Quill/editor HTML embeds */
+    .prose .ql-video-embed,
+    .prose .ql-html-embed,
+    .prose .ql-video-embed iframe,
+    .prose .ql-html-embed iframe,
+    .prose .ql-video-embed embed,
+    .prose .ql-html-embed embed,
+    .prose .ql-video-embed video,
+    .prose .ql-html-embed video {
+        display: block !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-top: 1.75em !important;
+        margin-bottom: 1.75em !important;
+        width: min(1100px, 90%) !important;
+        max-width: 100% !important;
+        aspect-ratio: 16/9 !important;
+        height: auto !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.35) !important;
+        background: #000 !important;
+    }
+
+    /* Ensure alignment helpers don't override centering for embedded content */
+    .prose .ql-align-center iframe,
+    .prose p.ql-align-center iframe,
+    .prose .ql-align-center embed,
+    .prose p.ql-align-center embed,
+    .prose .ql-align-center video,
+    .prose p.ql-align-center video,
+    .prose .ql-align-center .ql-video-embed,
+    .prose p.ql-align-center .ql-video-embed,
+    .prose .ql-align-center .ql-html-embed,
+    .prose p.ql-align-center .ql-html-embed {
+        margin-left: auto !important;
+        margin-right: auto !important;
+        display: block !important;
+        width: min(1100px, 90%) !important;
+        max-width: 100% !important;
+    }
+
+    @media (max-width: 1024px) {
+        .prose iframe,
+        .prose embed,
+        .prose video,
+        .prose .ql-video,
+        .prose .ql-video-embed,
+        .prose .ql-html-embed {
+            width: 95% !important;
+        }
     }
 
     @media (max-width: 640px) {
-        .prose iframe {
-            min-height: 200px;
-            border-radius: 0.25rem;
+        .prose iframe,
+        .prose embed,
+        .prose video,
+        .prose .ql-video,
+        .prose .ql-video-embed,
+        .prose .ql-html-embed {
+            width: 100% !important;
+            aspect-ratio: 16/9 !important;
+            min-height: 200px !important;
+            border-radius: 0.25rem !important;
         }
     }
 }

@@ -6,6 +6,24 @@
     <title>@yield('title', \App\Models\Setting::where('key', 'site_title')->value('value') ?? config('settings.site_title', 'Blog'))</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <link rel="stylesheet" href="{{ asset('css/wysiwyg-post.css') }}">
+        <style>
+            /* Page-level override: force WYSIWYG embed centering & larger responsive size */
+            .prose .ql-video-embed,
+            .prose .ql-html-embed,
+            .prose iframe,
+            .prose embed,
+            .prose video {
+                display: block !important;
+                margin: 1.75em auto !important;
+                width: min(1100px, 90%) !important;
+                max-width: 100% !important;
+                aspect-ratio: 16/9 !important;
+                height: auto !important;
+                border-radius: 0.5rem !important;
+                box-shadow: 0 6px 18px -6px rgba(0,0,0,0.35) !important;
+                background: #000 !important;
+            }
+        </style>
 </head>
 <body class="bg-gray-100 min-h-screen theme-default">
     <nav class="bg-white shadow mb-8">
